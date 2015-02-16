@@ -1,0 +1,59 @@
+---
+
+# Set timezone
+- name: Check current timezone
+  shell: awk -F\" '{ print $2}' /etc/sysconfig/clock
+  register: current_zone
+  changed_when: False
+
+- name: Set UTC timezone
+  file: src=/usr/share/zoneinfo/{{ timezone }}  dest=/etc/localtime state=link force=yes
+  when: current_zone.stdout != '{{ timezone }}'
+
+
+# Extra Packages for Enterprise Linux
+# https://fedoraproject.org/wiki/EPEL
+- name: Enable EPEL repo
+  yum: name=epel-release.noarch state=present
+
+
+# Install the "REMI" repo which contain php 5.4 packages that override the default
+# packages from the core distro. The core distro ships 5.3 still
+- name: Install REMI repo
+  yum: name=http://rpms.famillecollet.com/enterprise/remi-release-6.rpm state=present
+
+- name: Enable REMI repo
+  copy: src=remi.repo dest=/etc/yum.repos.d/remi.repo
+
+
+- name: Install curl, PHP, nodejs, git
+  yum: name={{item}} state=present
+  with_items:
+  - curl
+  - php-cli
+  - php-mbstring
+  - php-mcrypt
+  - php-pdo
+  - php-intl
+  - php-dom
+  - php-bcmath
+  - nodejs
+  - nodejs-less.noarch
+  - git
+
+- name: Put php.ini
+  template: src='php.ini.j2' dest='/etc/php.ini'
+
+
+- name: Make /var/log/php_errors.log world writable
+  file: path=/var/log/php_errors.log mode="a+rw" state=touch
+
+
+- name: install composer
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin creates=/usr/local/bin/composer
+
+- name: rename composer.phar to composer
+  shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+
+- name: make composer executable
+  file: path=/usr/local/bin/composer mode="a+x"

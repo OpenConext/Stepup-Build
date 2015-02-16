@@ -1,0 +1,10 @@
+---
+
+- name: Configuration for Step-up build env
+  hosts: all
+  sudo: True
+  vars:
+  - timezone: Europe/Amsterdam
+
+  roles:
+  - build
