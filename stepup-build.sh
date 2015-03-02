@@ -97,12 +97,15 @@ fi
 
 echo "Component: ${COMPONENT}"
 
+cd ${BASEDIR}
+echo "Base dir for cloning / fetching repo: `pwd`"
+
 # Checkout / update component from git 
 if [ ! -d "$COMPONENT" ]; then
-    cd ${CWD}
+    cd ${BASEDIR}
     git clone git@github.com:SURFnet/${COMPONENT}.git
 else
-    cd ${CWD}/${COMPONENT}
+    cd ${BASEDIR}/${COMPONENT}
     git fetch --all --tags
 fi
 if [ "$?" -ne "0" ]; then
@@ -110,7 +113,7 @@ if [ "$?" -ne "0" ]; then
 fi 
 
 
-cd ${CWD}/${COMPONENT}
+cd ${BASEDIR}/${COMPONENT}
 if [ "$?" -ne "0" ]; then
     error_exit "Error changing to component dir"
 fi
@@ -146,84 +149,28 @@ if [ "$?" -ne "0" ]; then
     error_exit "git clean failed"
 fi
 
-# echo stepup-build2.sh ${COMPONENT} ${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}
-
-vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${COMPONENT} ${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}"
-
-exit;
-
-
-
-# Make name for archive based on git commit hash and date
-COMMIT_HASH=`git log -1 --pretty="%H"`
-COMMIT_DATE=`git log -1 --pretty="%cd" --date=iso`
-COMMIT_Z_DATE=`php -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));"`
-NAME=${COMPONENT}-${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}-${COMMIT_Z_DATE}-${COMMIT_HASH}
-NAME=`echo "${NAME}" | tr / _`
-
-
-# Find a composer to use
-COMPOSER_PATH=`which composer.phar`
-if [ -z "${COMPOSER_PATH}" ]; then
-    COMPOSER_PATH=`which composer`
-    if [ -z "${COMPOSER_PATH}" ]; then
-        error_exit "Cannot find composer.phar"
-    fi
-fi
-COMPOSER_VERSION=`${COMPOSER_PATH} --version`
-echo "Using composer: ${COMPOSER_PATH}"
-echo "Composer version: ${COMPOSER_VERSION}"
-echo "Using symfony env: ${BUILD_ENV}"
-
-export SYMFONY_ENV=${BUILD_ENV}
-#export SYMFONY_ENV=build
-${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
-if [ $? -ne "0" ]; then
-    error_exit "Composer install failed"
-fi
-
-#php app/console assets:install --symlink
-#if [ $? -ne "0" ]; then
-#    error_exit "console command 'assets:install' failed"
-#fi
-
-#php app/console mopa:bootstrap:symlink:less
-#if [ $? -ne "0" ]; then
-#    error_exit "console command: 'mopa:bootstrap:symlink:less' failed"
-#fi
-
-TMP_ARCHIVE_DIR=`mktemp -d "/tmp/${COMPONENT}.XXXXXXXX"`
+mkdir -p ${BASEDIR}/tmp
 if [ $? -ne "0" ]; then
     error_exit "Could not create temp dir"
 fi
 
-
-${COMPOSER_PATH} archive --format=tar --dir="${TMP_ARCHIVE_DIR}" --no-interaction
+TMP_ARCHIVE_DIR=`mktemp -d "${BASEDIR}/tmp/build.XXXXXXXX"`
 if [ $? -ne "0" ]; then
-    error_exit "Composer achive failed"
+    error_exit "Could not create temp dir"
 fi
 
-ARCHIVE_TMP_NAME=`find "${TMP_ARCHIVE_DIR}" -name "*.tar"`
-if [ ! -f ${ARCHIVE_TMP_NAME} ]; then
-    error_exit "Archive not found"
+echo "Starting stage2 in the build VM"
+# "tmp/build.XXXXXXXX" is 18 characters long
+vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}"
+if [ $# -ne "0" ]; then
+    error_exit "Stage2 failed"
 fi
 
-# Manually add app/bootstrap.php.cache that was created by composer
-tar -rf "${ARCHIVE_TMP_NAME}" app/bootstrap.php.cache
-if [ $? -ne "0" ]; then
-    error_exit "Could not add app/bootstrap.php.cache to tar"
+
+cp -i ${TMP_ARCHIVE_DIR}/*.tar.bz2 ${CWD}/
+if [ $# -ne "0" ]; then
+    error_exit "Aborted."
 fi
 
-bzip2 -9 "${ARCHIVE_TMP_NAME}"
-if [ $? -ne "0" ]; then
-    error_exit "bzip2 failed"
-fi
-
-mv ${ARCHIVE_TMP_NAME}.bz2 ${CWD}/${NAME}.tar.bz2
-
-#echo ${TMP_ARCHIVE_DIR}
 rm -r ${TMP_ARCHIVE_DIR}
-
 cd ${CWD}
-
-echo "Created: ${CWD}/${NAME}.tar.bz2"

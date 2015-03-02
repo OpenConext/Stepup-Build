@@ -30,10 +30,20 @@ function error_exit {
 
 
 # Process options
+OUTPUT_DIR=$1
+if [ ! -d ${OUTPUT_DIR} ]; then
+    error_exit "Output dir does not exist"
+fi
+shift
+cd ${OUTPUT_DIR}
+OUTPUT_DIR=`pwd`
+echo "Using output dir: ${OUTPUT_DIR}"
+cd ${CWD}
+
 COMPONENT=$1
 shift
 if [ -z "${COMPONENT}"  ]; then
-    echo "Usage: $0 <component> (<TAG or BRANCH name>)"
+    echo "Usage: $0 <output dir> <component> (<TAG or BRANCH name>)"
     echo "Components: ${COMPONENTS[*]}"
     exit 1;
 fi
@@ -134,21 +144,22 @@ fi
 
 echo "Creating final archive"
 
-tar -cf "${CWD}/${NAME}.tar" .
+# Output dir is relative to CWD
+tar -cf "${OUTPUT_DIR}/${NAME}.tar" .
 if [ $? -ne "0" ]; then
     error_exit "Error creating archive"
 fi
 
-
-bzip2 -9 "${CWD}/${NAME}.tar"
+bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
 if [ $? -ne "0" ]; then
     rm ${CWD}/${NAME}.tar
     error_exit "bzip2 failed"
 fi
 
-
 rm -r ${TMP_ARCHIVE_DIR}
 
 cd ${CWD}
 
-echo "Created: ${CWD}/${NAME}.tar.bz2"
+echo "Created: ${NAME}.tar.bz2"
+
+echo "End of stage2"
