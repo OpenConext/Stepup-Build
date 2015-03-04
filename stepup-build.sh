@@ -98,7 +98,9 @@ fi
 echo "Component: ${COMPONENT}"
 
 cd ${BASEDIR}
-echo "Base dir for cloning / fetching repo: `pwd`"
+BASEDIR=`pwd`
+echo "Base dir for cloning / fetching repo: ${BASEDIR}"
+
 
 # Checkout / update component from git 
 if [ ! -d "$COMPONENT" ]; then
