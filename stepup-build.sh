@@ -161,9 +161,12 @@ if [ $? -ne "0" ]; then
     error_exit "Could not create temp dir"
 fi
 
+NAME=${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}
+NAME=`echo "${NAME}" | tr / _`
+
 echo "Starting stage2 in the build VM"
 # "tmp/build.XXXXXXXX" is 18 characters long
-vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}"
+vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 if [ $# -ne "0" ]; then
     error_exit "Stage2 failed"
 fi
