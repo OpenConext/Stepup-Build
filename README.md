@@ -5,7 +5,7 @@ Host Requirements:
 
 * Vagrant
 * virtual box, or another provider supported by vagrant
-* Ansible
+* Ansible 1.8 or newer
 
 Create the VM, from the root for the repo run:
 
