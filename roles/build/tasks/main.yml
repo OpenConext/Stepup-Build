@@ -1,14 +1,14 @@
 ---
 
-# Set timezone
-- name: Check current timezone
-  shell: awk -F\" '{ print $2}' /etc/sysconfig/clock
-  register: current_zone
-  changed_when: False
+- name: Set yum cache dir to /vagrant/yum/... dir (that is mounted on the host)
+  lineinfile: dest=/etc/yum.conf regexp=^cachedir= line=cachedir=/vagrant/yum/$basearch/$releasever
 
-- name: Set UTC timezone
+- name: Set keepcache=1
+  lineinfile: dest=/etc/yum.conf regexp=^keepcache= line=keepcache=1
+
+
+- name: Set timezone
   file: src=/usr/share/zoneinfo/{{ timezone }}  dest=/etc/localtime state=link force=yes
-  when: current_zone.stdout != '{{ timezone }}'
 
 
 # Extra Packages for Enterprise Linux
@@ -17,10 +17,10 @@
   yum: name=epel-release.noarch state=present
 
 
-# Install the "REMI" repo which contain php 5.4 packages that override the default
-# packages from the core distro. The core distro ships 5.3 still
+# Install the "REMI" repo which contain php packages that override the default
+# packages from the core distro. CentOD 7 ships with php 5.4
 - name: Install REMI repo
-  yum: name=http://rpms.famillecollet.com/enterprise/remi-release-6.rpm state=present
+  yum: name=http://rpms.famillecollet.com/enterprise/remi-release-7.rpm state=present
 
 - name: Enable REMI repo
   copy: src=remi.repo dest=/etc/yum.repos.d/remi.repo
