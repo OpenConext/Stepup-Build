@@ -15,7 +15,7 @@
 # limitations under the License.
 
 CWD=`pwd`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "oath-service-php")
 BUILD_ENV=build
 
 function error_exit {

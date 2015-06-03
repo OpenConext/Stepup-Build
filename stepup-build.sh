@@ -17,7 +17,7 @@
 
 CWD=`pwd`
 BASEDIR=`dirname $0`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "oath-service-php")
 DEFAULT_BRANCH=develop
 BUILD_ENV=build
 
