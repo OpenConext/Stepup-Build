@@ -15,7 +15,7 @@
 # limitations under the License.
 
 CWD=`pwd`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "oath-service-php")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php")
 BUILD_ENV=build
 
 function error_exit {
@@ -132,11 +132,13 @@ if [ $? -ne "0" ]; then
     error_exit "Untar failed"
 fi
 
-# Add bootstrap.php.cache
-echo Adding bootstrap.php.cache
-cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
-if [ $? -ne "0" ]; then
-    error_exit "Could not copy app/bootstrap.php.cache to archive"
+# Add bootstrap.php.cache (symfony2 apps only)
+if [ "${COMPONENT}" -ne "Stepup-tiqr"; then
+    echo Adding bootstrap.php.cache
+    cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
+    if [ $? -ne "0" ]; then
+        error_exit "Could not copy app/bootstrap.php.cache to archive"
+    fi
 fi
 
 # Add composer.phar
