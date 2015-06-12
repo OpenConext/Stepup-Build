@@ -133,7 +133,7 @@ if [ $? -ne "0" ]; then
 fi
 
 # Add bootstrap.php.cache (symfony2 apps only)
-if [ "${COMPONENT}" -ne "Stepup-tiqr"; then
+if [  "${COMPONENT}" != "Stepup-tiqr" ]; then
     echo Adding bootstrap.php.cache
     cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
     if [ $? -ne "0" ]; then
