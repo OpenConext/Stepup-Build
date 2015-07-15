@@ -6,6 +6,8 @@
 - name: Set keepcache=1
   lineinfile: dest=/etc/yum.conf regexp=^keepcache= line=keepcache=1
 
+- name: Exclude kernel packages in yum
+  lineinfile: dest=/etc/yum.conf regexp=^exclude=kernel line=exclude=kernel* 
 
 - name: Set timezone
   file: src=/usr/share/zoneinfo/{{ timezone }}  dest=/etc/localtime state=link force=yes
