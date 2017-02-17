@@ -70,7 +70,7 @@ commit_sha1=${BASH_REMATCH[3]}
 # Tag to use for publishing release
 githubtag=${tag_branch}-${commit_time}-${commit_sha1}
 
-githubrepo="SURFnet/${COMPONENT}"
+githubrepo="OpenConext/${COMPONENT}"
 
 echo "Path to tarball: ${COMPONENT_TARBALL}"
 echo "Component full: ${component_tarball_basename}"
