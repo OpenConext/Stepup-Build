@@ -100,6 +100,13 @@ fi
 #    error_exit "console command: 'mopa:bootstrap:symlink:less' failed"
 #fi
 
+if [  "${COMPONENT}" = "Stepup-tiqr" ]; then
+    echo run rebuild bootstrap cache
+    php vendor/sensio/distribution-bundle/Resources/bin/build_bootstrap.php
+    echo run composer encore production
+    ${COMPOSER_PATH} encore production
+fi
+
 TMP_ARCHIVE_DIR=`mktemp -d "/tmp/${COMPONENT}.XXXXXXXX"`
 if [ $? -ne "0" ]; then
     error_exit "Could not create temp dir"
@@ -117,14 +124,14 @@ if [ ! -f ${ARCHIVE_TMP_NAME} ]; then
 fi
 
 
-# Untar archicve we just created so we can add to it
+# Untar archive we just created so we can add to it
 # tar archives that are appended to (--append) cause trouble during untar on centos
 
 echo "Unpacking archive"
 
 cd ${TMP_ARCHIVE_DIR}
 if [ $? -ne "0" ]; then
-    error_exit "Could not cange to archive dir archive"
+    error_exit "Could not change to archive dir archive"
 fi
 
 tar -xf "${ARCHIVE_TMP_NAME}"
@@ -133,12 +140,10 @@ if [ $? -ne "0" ]; then
 fi
 
 # Add bootstrap.php.cache (symfony2 apps only)
-if [  "${COMPONENT}" != "Stepup-tiqr" ]; then
-    echo Adding bootstrap.php.cache
-    cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
-    if [ $? -ne "0" ]; then
-        error_exit "Could not copy app/bootstrap.php.cache to archive"
-    fi
+echo Adding bootstrap.php.cache
+cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
+if [ $? -ne "0" ]; then
+    error_exit "Could not copy app/bootstrap.php.cache to archive"
 fi
 
 # Add composer.phar
