@@ -90,6 +90,10 @@ if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
 fi
 
+# NOTE: assets:install is run automatically with composer install (ScriptHandler::installAssets)
+# so that public assets (css, js, etc) from bundles are published in web/bundles/
+# make sure these assets are not symlinks into vendor/ as they will be ignored by composer archive
+# https://github.com/composer/composer/issues/2552
 #php app/console assets:install --symlink
 #if [ $? -ne "0" ]; then
 #    error_exit "console command 'assets:install' failed"
@@ -100,12 +104,34 @@ fi
 #    error_exit "console command: 'mopa:bootstrap:symlink:less' failed"
 #fi
 
+# new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
 if [  "${COMPONENT}" = "Stepup-tiqr" ]; then
-    echo run rebuild bootstrap cache
-    php vendor/sensio/distribution-bundle/Resources/bin/build_bootstrap.php
+    echo copy bootstrap cache
+    # note: bootstrap.php.cache is generated in var/ with symfony3 (instead of app/ with symfony2)
+    # for now, copy to remain compatible with deploy scripts until they are symfony3-compatible
+    cp var/bootstrap.php.cache app/
+    # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
     echo run composer encore production
     ${COMPOSER_PATH} encore production
+    #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
+    ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
+    if [ $? -ne "0" ]; then
+        error_exit "Composer archive failed"
+    fi
+    # Output dir is relative to CWD
+    bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
+    if [ $? -ne "0" ]; then
+        rm ${CWD}/${NAME}.tar
+        error_exit "bzip2 failed"
+    fi
+    cd ${CWD}
+    echo "Created: ${NAME}.tar.bz2"
+    echo "End of stage2"
+    exit
 fi
+
+# old build procedure for outher components from here....
+# TODO: migrate to new build procedure
 
 TMP_ARCHIVE_DIR=`mktemp -d "/tmp/${COMPONENT}.XXXXXXXX"`
 if [ $? -ne "0" ]; then
