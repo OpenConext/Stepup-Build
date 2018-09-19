@@ -85,6 +85,7 @@ echo "Using symfony env: ${BUILD_ENV}"
 
 export SYMFONY_ENV=${BUILD_ENV}
 #export SYMFONY_ENV=build
+echo ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
