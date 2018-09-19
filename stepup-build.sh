@@ -164,8 +164,11 @@ fi
 NAME=${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}
 NAME=`echo "${NAME}" | tr / _`
 
+cd ${BASEDIR}
+
 echo "Starting stage2 in the build VM"
 # "tmp/build.XXXXXXXX" is 18 characters long
+echo vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 if [ $# -ne "0" ]; then
     error_exit "Stage2 failed"
