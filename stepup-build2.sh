@@ -83,6 +83,13 @@ echo "Using composer: ${COMPOSER_PATH}"
 echo "Composer version: ${COMPOSER_VERSION}"
 echo "Using symfony env: ${BUILD_ENV}"
 
+echo ${COMPOSER_PATH} validate
+${COMPOSER_PATH} validate
+if [ $? -ne "0" ]; then
+    error_exit "Composer validate failed"
+fi
+
+
 export SYMFONY_ENV=${BUILD_ENV}
 echo export SYMFONY_ENV=${BUILD_ENV}
 echo ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
