@@ -84,12 +84,13 @@ echo "Composer version: ${COMPOSER_VERSION}"
 echo "Using symfony env: ${BUILD_ENV}"
 
 export SYMFONY_ENV=${BUILD_ENV}
-#export SYMFONY_ENV=build
+echo export SYMFONY_ENV=${BUILD_ENV}
 echo ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
 fi
+echo "Composer install done"
 
 # NOTE: assets:install is run automatically with composer install (ScriptHandler::installAssets)
 # so that public assets (css, js, etc) from bundles are published in web/bundles/
