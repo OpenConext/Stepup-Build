@@ -2,7 +2,7 @@
 
 - name: Configuration for Step-up build env
   hosts: all
-  sudo: True
+  become: True
   vars:
   - timezone: Europe/Amsterdam
 

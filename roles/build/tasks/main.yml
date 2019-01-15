@@ -29,19 +29,20 @@
 
 
 - name: Install curl, PHP, nodejs, git
-  yum: name={{item}} state=present
-  with_items:
-  - curl
-  - php-cli
-  - php-mbstring
-  - php-mcrypt
-  - php-pdo
-  - php-intl
-  - php-dom
-  - php-bcmath
-  - nodejs
-  - nodejs-less.noarch
-  - git
+  yum:
+    state: present
+    name:
+    - curl
+    - php-cli
+    - php-mbstring
+    - php-mcrypt
+    - php-pdo
+    - php-intl
+    - php-dom
+    - php-bcmath
+    - nodejs
+    - nodejs-less.noarch
+    - git
 
 - name: Put php.ini
   template: src='php.ini.j2' dest='/etc/php.ini'
