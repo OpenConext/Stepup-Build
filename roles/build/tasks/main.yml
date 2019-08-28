@@ -109,4 +109,3 @@
     name: yarn
     global: yes
     state: present
-  #shell: npm install -g yarn
