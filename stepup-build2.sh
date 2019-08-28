@@ -26,7 +26,6 @@ function error_exit {
     fi
     cd ${CWD}
     exit 1
-
 }
 
 # Process options
@@ -117,7 +116,7 @@ fi
 echo "Composer install done"
 
 # Webauthn uses Symfony 4 and php 7.2
-if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
+if [  "${COMPONENT}" = "Stepup-Webauthn" ]; then
     echo npm config set cache ${HOME}/npm_cache
     npm config set cache ${HOME}/npm_cache
     if [ $? -ne "0" ]; then
@@ -153,7 +152,6 @@ if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
     echo "End of stage2"
     exit
 fi
-
 
 # new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
 if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
