@@ -98,8 +98,6 @@ fi
 echo "Composer validate done"
 
 
-echo export SYMFONY_ENV=${BUILD_ENV}
-
 if [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
     echo "Use the .env.dist file"
     cp .env.dist .env
@@ -107,6 +105,8 @@ if [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
     cp config/packages/parameters.yaml.dist config/packages/parameters.yaml
     cp config/packages/institutions.yaml.dist config/packages/institutions.yaml
 fi
+
+export SYMFONY_ENV=${BUILD_ENV}
 
 echo ${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 ${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
