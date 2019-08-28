@@ -15,7 +15,7 @@
 # limitations under the License.
 
 CWD=`pwd`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php")
 BUILD_ENV=build
 SYMFONY_ENV=prod
 
@@ -61,17 +61,23 @@ fi
 
 cd ${COMPONENT}
 
+# Select php version to use based on component
+PHP=php56
+if [  "${COMPONENT}" = "Stepup-Webauthn" ]; then
+    PHP=php72
+fi
+
 # Optional TAG or BRANCH name, not verified
 GIT_TAG_OR_BRANCH=$1
 
 # Make name for archive based on git commit hash and date
 COMMIT_HASH=`git log -1 --pretty="%H"`
 COMMIT_DATE=`git log -1 --pretty="%cd" --date=iso`
-COMMIT_Z_DATE=`php -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));"`
+COMMIT_Z_DATE=`${PHP} -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));"`
 NAME=${COMPONENT}-${GIT_HEAD}${GIT_TAG_OR_BRANCH}-${COMMIT_Z_DATE}-${COMMIT_HASH}
 
 
-# Find a composer to use
+# Find a composer to use. Try "composer.phar" and "composer"
 COMPOSER_PATH=`which composer.phar`
 if [ -z "${COMPOSER_PATH}" ]; then
     COMPOSER_PATH=`which composer`
@@ -83,36 +89,65 @@ COMPOSER_VERSION=`${COMPOSER_PATH} --version`
 echo "Using composer: ${COMPOSER_PATH}"
 echo "Composer version: ${COMPOSER_VERSION}"
 echo "Using symfony env: ${BUILD_ENV}"
+echo "Using ${PHP}"
 
+# Check that composer lock and composer match
 echo ${COMPOSER_PATH} validate
-${COMPOSER_PATH} validate
+${PHP} ${COMPOSER_PATH} validate
 if [ $? -ne "0" ]; then
     error_exit "Composer validate failed"
 fi
+echo "Composer validate done"
 
 
-export SYMFONY_ENV=${BUILD_ENV}
 echo export SYMFONY_ENV=${BUILD_ENV}
-echo ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
-${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
+export SYMFONY_ENV=${BUILD_ENV}
+echo ${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
+${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
 fi
 echo "Composer install done"
 
-# NOTE: assets:install is run automatically with composer install (ScriptHandler::installAssets)
-# so that public assets (css, js, etc) from bundles are published in web/bundles/
-# make sure these assets are not symlinks into vendor/ as they will be ignored by composer archive
-# https://github.com/composer/composer/issues/2552
-#php app/console assets:install --symlink
-#if [ $? -ne "0" ]; then
-#    error_exit "console command 'assets:install' failed"
-#fi
 
-#php app/console mopa:bootstrap:symlink:less
-#if [ $? -ne "0" ]; then
-#    error_exit "console command: 'mopa:bootstrap:symlink:less' failed"
-#fi
+# Webauthn uses Symfony 4 and php 7.2
+if [  "${COMPONENT}" = "Stepup-Webauthn" ]; then
+    echo npm config set cache ${HOME}/npm_cache
+    npm config set cache ${HOME}/npm_cache
+    if [ $? -ne "0" ]; then
+        error_exit "setting npm cache location failed"
+    fi
+
+    echo yarn --cache-folder=${HOME}/yarn_cache install
+    yarn --cache-folder=${HOME}/yarn_cache install
+    if [ $? -ne "0" ]; then
+        error_exit "yarn install failed"
+    fi
+
+    echo yarn --cache-folder=${HOME}/yarn_cache encore prod
+    yarn  --cache-folder=${HOME}/yarn_cache encore prod
+    if [ $? -ne "0" ]; then
+        error_exit "install encore failed"
+    fi
+
+    echo ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
+    ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
+    if [ $? -ne "0" ]; then
+        error_exit "Composer archive failed"
+    fi
+    # Output dir is relative to CWD
+    echo bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
+    bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
+    if [ $? -ne "0" ]; then
+        rm ${CWD}/${NAME}.tar
+        error_exit "bzip2 failed"
+    fi
+    cd ${CWD}
+    echo "Created: ${NAME}.tar.bz2"
+    echo "End of stage2"
+    exit
+fi
+
 
 # new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
 if [  "${COMPONENT}" = "Stepup-tiqr" ]; then
@@ -121,10 +156,12 @@ if [  "${COMPONENT}" = "Stepup-tiqr" ]; then
     # for now, copy to remain compatible with deploy scripts until they are symfony3-compatible
     cp var/bootstrap.php.cache app/
     # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
-    echo run composer encore production
-    ${COMPOSER_PATH} encore production
+    echo ${PHP} ${COMPOSER_PATH} encore production
+    ${PHP} ${COMPOSER_PATH} encore production
+    if [ $? -ne "0" ]; then
+        error_exit "encore failed"
     #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
-    ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
+    ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
     if [ $? -ne "0" ]; then
         error_exit "Composer archive failed"
     fi
@@ -149,7 +186,7 @@ if [ $? -ne "0" ]; then
 fi
 
 
-${COMPOSER_PATH} archive --format=tar --dir="${TMP_ARCHIVE_DIR}" --no-interaction
+${PHP} ${COMPOSER_PATH} archive --format=tar --dir="${TMP_ARCHIVE_DIR}" --no-interaction
 if [ $? -ne "0" ]; then
     error_exit "Composer achive failed"
 fi
