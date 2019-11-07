@@ -90,7 +90,7 @@ github_token=`cat ~/.github-access-token`
 
 
 
-TMP_FILE=`mktemp -t github-upload`
+TMP_FILE=`mktemp -t github-uploadXXXX`
 if [ $? -ne "0" ]; then
     error_exit "Could not create temp file"
 fi
