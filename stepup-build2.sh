@@ -17,6 +17,7 @@
 CWD=`pwd`
 COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php")
 BUILD_ENV=build
+SYMFONY_ENV=prod
 
 function error_exit {
     echo "${1}"
@@ -178,7 +179,11 @@ fi
 echo Adding bootstrap.php.cache
 cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
 if [ $? -ne "0" ]; then
-    error_exit "Could not copy app/bootstrap.php.cache to archive"
+    #Bootstrap file is in /var on symfony3
+    cp ${CWD}/${COMPONENT}/var/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/var
+    if [ $? -ne "0" ]; then
+	    error_exit "Could not copy app/bootstrap.php.cache or var/bootstrap.php.cache to archive"
+    fi
 fi
 
 # Add composer.phar
