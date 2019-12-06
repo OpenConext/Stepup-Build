@@ -9,8 +9,8 @@ Host Requirements:
 
 Create the VM, from the root for the repo run:
 
-`varant up --provider=virtualbox`
- (or `varant up --provider=vmware_fusion`)
+`vagrant up --provider=virtualbox`
+ (or `vagrant up --provider=vmware_fusion`)
 
 To rerun just the ansible provisioning: `vagrant provision`
 
