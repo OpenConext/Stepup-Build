@@ -12,13 +12,13 @@ Vagrant.configure(2) do |config|
 
     conf.vm.hostname = "stepup-build"
     conf.vm.provider "vmware_fusion" do |v|
-      v.vmx["memsize"] = "4096"
+      v.vmx["memsize"] = "8192"
       v.vmx["numvcpus"] = "1"
       # puppetlabs centos box uses ens33 nic
       v.vmx["ethernet0.pciSlotNumber"] = "33"
     end
     config.vm.provider "virtualbox" do |v|
-      v.memory = 4096
+      v.memory = 8192
     end
   end
 
