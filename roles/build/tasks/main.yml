@@ -54,6 +54,7 @@
     - php56-php-intl
     - php56-php-dom
     - php56-php-bcmath
+    - php56-php-gmp
 
     # php 7.2
     - php72-php-cli
@@ -63,6 +64,7 @@
     - php72-php-intl
     - php72-php-dom
     - php72-php-bcmath
+    - php72-php-gmp
 
     - curl
     - git
