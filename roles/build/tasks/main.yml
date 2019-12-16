@@ -7,7 +7,7 @@
   lineinfile: dest=/etc/yum.conf regexp=^keepcache= line=keepcache=1
 
 - name: Exclude kernel packages in yum
-  lineinfile: dest=/etc/yum.conf regexp=^exclude=kernel line=exclude=kernel* 
+  lineinfile: dest=/etc/yum.conf regexp=^exclude=kernel line=exclude=kernel*
 
 - name: Set timezone
   file: src=/usr/share/zoneinfo/{{ timezone }}  dest=/etc/localtime state=link force=yes
@@ -77,16 +77,17 @@
 - name: Make /var/log/php_errors.log world writable
   file: path=/var/log/php_errors.log mode="a+rw" state=touch
 
-
 - name: install composer
-  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin creates=/usr/local/bin/composer
+  shell:
+    cmd: curl -sS https://getcomposer.org/installer | /usr/bin/php72 -- --install-dir=/usr/local/bin
+    creates: /usr/local/bin/composer
+    warn: false
 
 - name: rename composer.phar to composer
   shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
 
 - name: make composer executable
   file: path=/usr/local/bin/composer mode="a+x"
-
 
 # Install a nodejs that is newer than the Centos 7 distro version (6.17.1)
 - name: "Install nodejs 10.x repo"
@@ -100,7 +101,6 @@
     state: present
     name:
       - nodejs
-
 
 - name: install yarn
   shell: npm install -g yarn
