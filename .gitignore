@@ -7,8 +7,7 @@
 /Stepup-tiqr/
 /oath-service-php/
 /Stepup-Azure-MFA/
->>>>>>> origin/master
-Stepup-Webauthn/
+/Stepup-Webauthn/
 /yum/
 *~
 *VBoxSVC-*.log
