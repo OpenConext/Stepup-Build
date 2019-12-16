@@ -6,3 +6,5 @@
 /Stepup-Gateway/
 /yum/
 *~
+*VBoxSVC-*.log
+/*.tar.bz2
