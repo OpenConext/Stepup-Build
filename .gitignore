@@ -1,7 +1,14 @@
 /.vagrant
 /.idea
-/Stepup-RA
+/Stepup-RA/
 /Stepup-SelfService/
 /Stepup-Middleware/
 /Stepup-Gateway/
+/Stepup-tiqr/
+/oath-service-php/
+/Stepup-Azure-MFA/
+Stepup-Webauthn/
 /yum/
+*~
+*VBoxSVC-*.log
+/*.tar.bz2
