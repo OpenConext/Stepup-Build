@@ -17,7 +17,7 @@
 
 CWD=`pwd`
 BASEDIR=`dirname $0`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php" "Stepup-Azure-MFA")
 DEFAULT_BRANCH=develop
 BUILD_ENV=build
 
@@ -102,7 +102,7 @@ BASEDIR=`pwd`
 echo "Base dir for cloning / fetching repo: ${BASEDIR}"
 
 
-# Checkout / update component from git 
+# Checkout / update component from git
 if [ ! -d "$COMPONENT" ]; then
     cd ${BASEDIR}
     git clone git@github.com:OpenConext/${COMPONENT}.git
@@ -112,7 +112,7 @@ else
 fi
 if [ "$?" -ne "0" ]; then
     error_exit "Error cloning / fetching repo"
-fi 
+fi
 
 
 cd ${BASEDIR}/${COMPONENT}

@@ -15,7 +15,7 @@
 # limitations under the License.
 
 CWD=`pwd`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php" "Stepup-Azure-MFA")
 BUILD_ENV=build
 SYMFONY_ENV=prod
 
@@ -28,7 +28,6 @@ function error_exit {
     exit 1
 
 }
-
 
 # Process options
 OUTPUT_DIR=$1
@@ -61,13 +60,19 @@ fi
 
 cd ${COMPONENT}
 
+# Select php version to use based on component
+PHP=php56
+if [  "${COMPONENT}" = "Stepup-Webauthn" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
+    PHP=php72
+fi
+
 # Optional TAG or BRANCH name, not verified
 GIT_TAG_OR_BRANCH=$1
 
 # Make name for archive based on git commit hash and date
 COMMIT_HASH=`git log -1 --pretty="%H"`
 COMMIT_DATE=`git log -1 --pretty="%cd" --date=iso`
-COMMIT_Z_DATE=`php -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));"`
+COMMIT_Z_DATE=`${PHP} -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));"`
 NAME=${COMPONENT}-${GIT_HEAD}${GIT_TAG_OR_BRANCH}-${COMMIT_Z_DATE}-${COMMIT_HASH}
 
 
@@ -85,7 +90,7 @@ echo "Composer version: ${COMPOSER_VERSION}"
 echo "Using symfony env: ${BUILD_ENV}"
 
 echo ${COMPOSER_PATH} validate
-${COMPOSER_PATH} validate
+${PHP} ${COMPOSER_PATH} validate
 if [ $? -ne "0" ]; then
     error_exit "Composer validate failed"
 fi
@@ -93,8 +98,8 @@ fi
 
 export SYMFONY_ENV=${BUILD_ENV}
 echo export SYMFONY_ENV=${BUILD_ENV}
-echo ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
-${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
+echo ${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
+${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
 fi
@@ -115,16 +120,16 @@ echo "Composer install done"
 #fi
 
 # new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
-if [  "${COMPONENT}" = "Stepup-tiqr" ]; then
+if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
     echo copy bootstrap cache
     # note: bootstrap.php.cache is generated in var/ with symfony3 (instead of app/ with symfony2)
     # for now, copy to remain compatible with deploy scripts until they are symfony3-compatible
     cp var/bootstrap.php.cache app/
     # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
     echo run composer encore production
-    ${COMPOSER_PATH} encore production
+    ${PHP} ${COMPOSER_PATH} encore production
     #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
-    ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
+    ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
     if [ $? -ne "0" ]; then
         error_exit "Composer archive failed"
     fi
