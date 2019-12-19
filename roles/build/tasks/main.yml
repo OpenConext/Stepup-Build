@@ -6,6 +6,8 @@
 - name: Set keepcache=1
   lineinfile: dest=/etc/yum.conf regexp=^keepcache= line=keepcache=1
 
+- name: Exclude kernel packages in yum
+  lineinfile: dest=/etc/yum.conf regexp=^exclude=kernel line=exclude=kernel* 
 
 - name: Set timezone
   file: src=/usr/share/zoneinfo/{{ timezone }}  dest=/etc/localtime state=link force=yes
@@ -27,19 +29,21 @@
 
 
 - name: Install curl, PHP, nodejs, git
-  yum: name={{item}} state=present
-  with_items:
-  - curl
-  - php-cli
-  - php-mbstring
-  - php-mcrypt
-  - php-pdo
-  - php-intl
-  - php-dom
-  - php-bcmath
-  - nodejs
-  - nodejs-less.noarch
-  - git
+  yum:
+    state: present
+    name:
+    - curl
+    - php-cli
+    - php-mbstring
+    - php-mcrypt
+    - php-pdo
+    - php-intl
+    - php-dom
+    - php-bcmath
+    - nodejs
+    - nodejs-less.noarch
+    - git
+    - unzip
 
 - name: Put php.ini
   template: src='php.ini.j2' dest='/etc/php.ini'
@@ -57,3 +61,6 @@
 
 - name: make composer executable
   file: path=/usr/local/bin/composer mode="a+x"
+
+- name: install yarn
+  shell: npm install -g yarn

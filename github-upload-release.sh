@@ -15,7 +15,7 @@
 
 CWD=`pwd`
 BASEDIR=`dirname $0`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php" "Stepup-irma")
 
 function error_exit {
     echo "${1}"
@@ -70,7 +70,7 @@ commit_sha1=${BASH_REMATCH[3]}
 # Tag to use for publishing release
 githubtag=${tag_branch}-${commit_time}-${commit_sha1}
 
-githubrepo="SURFnet/${COMPONENT}"
+githubrepo="OpenConext/${COMPONENT}"
 
 echo "Path to tarball: ${COMPONENT_TARBALL}"
 echo "Component full: ${component_tarball_basename}"
@@ -90,7 +90,7 @@ github_token=`cat ~/.github-access-token`
 
 
 
-TMP_FILE=`mktemp -t github-upload`
+TMP_FILE=`mktemp -t github-uploadXXXX`
 if [ $? -ne "0" ]; then
     error_exit "Could not create temp file"
 fi

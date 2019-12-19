@@ -17,7 +17,7 @@
 
 CWD=`pwd`
 BASEDIR=`dirname $0`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php")
 DEFAULT_BRANCH=develop
 BUILD_ENV=build
 
@@ -105,7 +105,7 @@ echo "Base dir for cloning / fetching repo: ${BASEDIR}"
 # Checkout / update component from git 
 if [ ! -d "$COMPONENT" ]; then
     cd ${BASEDIR}
-    git clone git@github.com:SURFnet/${COMPONENT}.git
+    git clone git@github.com:OpenConext/${COMPONENT}.git
 else
     cd ${BASEDIR}/${COMPONENT}
     git fetch --all --tags
@@ -164,8 +164,11 @@ fi
 NAME=${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}
 NAME=`echo "${NAME}" | tr / _`
 
+cd ${BASEDIR}
+
 echo "Starting stage2 in the build VM"
 # "tmp/build.XXXXXXXX" is 18 characters long
+echo vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 if [ $# -ne "0" ]; then
     error_exit "Stage2 failed"
