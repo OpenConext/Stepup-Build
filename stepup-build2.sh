@@ -100,9 +100,11 @@ export SYMFONY_ENV=${BUILD_ENV}
 echo export SYMFONY_ENV=${BUILD_ENV}
 
 if [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
+    echo "Use the .env.dist file"
     mv .env.dist .env
-    mp config/packages/parameters.yaml.dist config/packages/parameters.yaml
-    mp config/packages/institutions.yaml.dist config/packages/institutions.yaml
+    echo "Copy the parameters and institutions dist files"
+    mv config/packages/parameters.yaml.dist config/packages/parameters.yaml
+    mv config/packages/institutions.yaml.dist config/packages/institutions.yaml
 fi
 
 echo ${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
@@ -128,11 +130,9 @@ echo "Composer install done"
 
 # new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
 if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
-    echo copy bootstrap cache
-    # note: bootstrap.php.cache is generated in var/ with symfony3 (instead of app/ with symfony2)
-    # for now, copy to remain compatible with deploy scripts until they are symfony3-compatible
-    cp var/bootstrap.php.cache app/
     # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
+    echo install frontend dependencies
+    ${PHP} ${COMPOSER_PATH} frontend-install
     echo run composer encore production
     ${PHP} ${COMPOSER_PATH} encore production
     #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
