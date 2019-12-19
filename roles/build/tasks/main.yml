@@ -7,7 +7,7 @@
   lineinfile: dest=/etc/yum.conf regexp=^keepcache= line=keepcache=1
 
 - name: Exclude kernel packages in yum
-  lineinfile: dest=/etc/yum.conf regexp=^exclude=kernel line=exclude=kernel* 
+  lineinfile: dest=/etc/yum.conf regexp=^exclude=kernel line=exclude=kernel*
 
 - name: Set timezone
   file: src=/usr/share/zoneinfo/{{ timezone }}  dest=/etc/localtime state=link force=yes
@@ -27,12 +27,10 @@
 - name: Enable REMI repo
   copy: src=remi.repo dest=/etc/yum.repos.d/remi.repo
 
-
-- name: Install curl, PHP, nodejs, git
+- name: Remove default php
   yum:
-    state: present
+    state: removed
     name:
-    - curl
     - php-cli
     - php-mbstring
     - php-mcrypt
@@ -40,21 +38,52 @@
     - php-intl
     - php-dom
     - php-bcmath
-    - nodejs
-    - nodejs-less.noarch
+
+    #- nodejs
+    #- nodejs-less.noarch
+
+- name: Install PHP 5.6 and 7.2, curl, git
+  yum:
+    state: present
+    name:
+    # php 5.6
+    - php56-php-cli
+    - php56-php-mbstring
+    - php56-php-mcrypt
+    - php56-php-pdo
+    - php56-php-intl
+    - php56-php-dom
+    - php56-php-bcmath
+    - php56-php-gmp
+
+    # php 7.2
+    - php72-php-cli
+    - php72-php-mbstring
+    - php72-php-mcrypt
+    - php72-php-pdo
+    - php72-php-intl
+    - php72-php-dom
+    - php72-php-bcmath
+    - php72-php-gmp
+
+    - curl
     - git
     - unzip
 
-- name: Put php.ini
-  template: src='php.ini.j2' dest='/etc/php.ini'
+- name: Put php.ini for 5.6
+  template: src='php.ini.j2' dest='/etc/opt/remi/php56/php.ini'
 
+- name: Put php.ini for 7.2
+  template: src='php.ini.j2' dest='/etc/opt/remi/php72/php.ini'
 
 - name: Make /var/log/php_errors.log world writable
   file: path=/var/log/php_errors.log mode="a+rw" state=touch
 
-
 - name: install composer
-  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin creates=/usr/local/bin/composer
+  shell:
+    cmd: curl -sS https://getcomposer.org/installer | /usr/bin/php72 -- --install-dir=/usr/local/bin
+    creates: /usr/local/bin/composer
+    warn: false
 
 - name: rename composer.phar to composer
   shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
@@ -62,5 +91,22 @@
 - name: make composer executable
   file: path=/usr/local/bin/composer mode="a+x"
 
-- name: install yarn
-  shell: npm install -g yarn
+# Install a nodejs that is newer than the Centos 7 distro version (6.17.1)
+- name: "Install nodejs 10.x repo"
+  shell:
+    cmd: "curl -sL https://rpm.nodesource.com/setup_10.x | bash -"
+    warn: false
+    creates: /etc/yum.repos.d/nodesource-el7.repo
+
+- name: "Install nodejs 10.x"
+  yum:
+    state: present
+    name:
+      - nodejs
+
+- name: "Install npm module 'yarn'"
+  npm:
+    name: yarn
+    global: yes
+    state: present
+  #shell: npm install -g yarn
