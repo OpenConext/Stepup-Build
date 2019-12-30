@@ -111,7 +111,7 @@ echo "Composer install done"
 
 
 # Webauthn uses Symfony 4 and php 7.2
-if [  "${COMPONENT}" = "Stepup-Webauthn" ]; then
+if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
     echo npm config set cache ${HOME}/npm_cache
     npm config set cache ${HOME}/npm_cache
     if [ $? -ne "0" ]; then
