@@ -160,6 +160,7 @@ if [  "${COMPONENT}" = "Stepup-tiqr" ]; then
     ${PHP} ${COMPOSER_PATH} encore production
     if [ $? -ne "0" ]; then
         error_exit "encore failed"
+    fi
     #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
     ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
     if [ $? -ne "0" ]; then
