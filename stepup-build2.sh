@@ -103,8 +103,8 @@ if [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
     echo "Use the .env.dist file"
     mv .env.dist .env
     echo "Copy the parameters and institutions dist files"
-    mv config/packages/parameters.yaml.dist config/packages/parameters.yaml
-    mv config/packages/institutions.yaml.dist config/packages/institutions.yaml
+    cp config/packages/parameters.yaml.dist config/packages/parameters.yaml
+    cp config/packages/institutions.yaml.dist config/packages/institutions.yaml
 fi
 
 echo ${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
