@@ -154,7 +154,6 @@ if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
     exit
 fi
 
-
 # new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
 if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
     # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
