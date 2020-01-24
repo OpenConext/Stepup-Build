@@ -65,6 +65,7 @@
     - php72-php-dom
     - php72-php-bcmath
     - php72-php-gmp
+    - php72-php-pecl-libsodium
 
     - curl
     - git
