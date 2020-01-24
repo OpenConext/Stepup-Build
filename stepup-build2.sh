@@ -98,10 +98,11 @@ fi
 echo "Composer validate done"
 
 
-if [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
+if [  "${COMPONENT}" = "Stepup-Azure-MFA" ] || [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
     echo "Use the .env.dist file"
     cp .env.dist .env
     echo "Copy the parameters and institutions dist files"
+    cp config/packages/parameters.yml.dist config/packages/parameters.yml
     cp config/packages/parameters.yaml.dist config/packages/parameters.yaml
     cp config/packages/institutions.yaml.dist config/packages/institutions.yaml
 fi
