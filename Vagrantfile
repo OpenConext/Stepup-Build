@@ -7,7 +7,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "stepup-build" do |conf|
     # Prevent port "2222" in use error which Vagrant is unable auto correct by choosing a ssh port randomly
     r = Random.new
-    ssh_port = r.rand(1000...5000)
+    ssh_port = r.rand(1025...5000)
     config.vm.network "forwarded_port", guest: 22, host: "#{ssh_port}", id: 'ssh', auto_correct: true
 
     conf.vm.hostname = "stepup-build"
