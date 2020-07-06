@@ -162,11 +162,8 @@ if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA"
     # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
     echo install frontend dependencies
     ${PHP} ${COMPOSER_PATH} frontend-install
-    echo run composer encore production
-    echo ${PHP} ${COMPOSER_PATH} encore production
-    ${PHP} ${COMPOSER_PATH} encore production
     if [ $? -ne "0" ]; then
-        error_exit "encore failed"
+        error_exit "frontend-install"
     fi
     #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
     ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
