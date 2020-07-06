@@ -101,7 +101,7 @@ fi
 echo "Composer validate done"
 
 
-if [  "${COMPONENT}" = "Stepup-Azure-MFA" ] || [ "${COMPONENT}" = "Stepup-Webauthn" ] || [  "${COMPONENT}" = "Stepup-RA" ] || [  "${COMPONENT}" = "Stepup-Middleware" ]; then
+if [  "${COMPONENT}" = "Stepup-Azure-MFA" ] || [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
     echo "Use the .env.dist file"
     cp .env.dist .env
     echo "Copy the parameters and institutions dist files"
@@ -120,7 +120,7 @@ fi
 echo "Composer install done"
 
 # Webauthn uses Symfony 4 and php 7.2
-if [ "${COMPONENT}" = "Stepup-Webauthn" ] || [  "${COMPONENT}" = "Stepup-RA" ] || [  "${COMPONENT}" = "Stepup-Middleware" ]; then
+if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
     echo npm config set cache ${HOME}/npm_cache
     npm config set cache ${HOME}/npm_cache
     if [ $? -ne "0" ]; then
@@ -185,7 +185,7 @@ if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA"
     exit
 fi
 
-# old build procedure for outher components from here....
+# old build procedure for other components from here....
 # TODO: migrate to new build procedure
 
 TMP_ARCHIVE_DIR=`mktemp -d "/tmp/${COMPONENT}.XXXXXXXX"`
@@ -220,25 +220,27 @@ if [ $? -ne "0" ]; then
     error_exit "Untar failed"
 fi
 
+
 # Add bootstrap.php.cache (symfony2 apps only)
-echo Adding bootstrap.php.cache
-cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
-if [ $? -ne "0" ]; then
-    #Bootstrap file is in /var on symfony3
-    cp ${CWD}/${COMPONENT}/var/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/var
-    if [ $? -ne "0" ]; then
-	    error_exit "Could not copy app/bootstrap.php.cache or var/bootstrap.php.cache to archive"
-    fi
-fi
+if [ "$PHP" != "php72" ]; then
+  echo Adding bootstrap.php.cache
+  cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
+  if [ $? -ne "0" ]; then
+      #Bootstrap file is in /var on symfony3
+      cp ${CWD}/${COMPONENT}/var/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/var
+      if [ $? -ne "0" ]; then
+  	    error_exit "Could not copy app/bootstrap.php.cache or var/bootstrap.php.cache to archive"
+      fi
+  fi
 
-# Add composer.phar
-# console mopa:bootstrap:symlink:less requires it
-echo Adding composer.phar
-cp ${COMPOSER_PATH} ${TMP_ARCHIVE_DIR}/composer.phar
-if [ $? -ne "0" ]; then
-    error_exit "Could not copy composer.phar to archive"
+  # Add composer.phar
+  # console mopa:bootstrap:symlink:less requires it
+  echo Adding composer.phar
+  cp ${COMPOSER_PATH} ${TMP_ARCHIVE_DIR}/composer.phar
+  if [ $? -ne "0" ]; then
+      error_exit "Could not copy composer.phar to archive"
+  fi
 fi
-
 
 rm ${ARCHIVE_TMP_NAME}
 if [ $? -ne "0" ]; then
