@@ -16,8 +16,11 @@
 
 CWD=`pwd`
 COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php"  "Stepup-Azure-MFA")
-BUILD_ENV=build
-SYMFONY_ENV=prod
+export BUILD_ENV=build
+# for Symfony >= 4
+export APP_ENV=prod
+# for Symfony <= 3:
+export SYMFONY_ENV=prod
 
 function error_exit {
     echo "${1}"
@@ -61,7 +64,7 @@ cd ${COMPONENT}
 
 # Select php version to use based on component
 PHP=php56
-if [  "${COMPONENT}" = "Stepup-Webauthn" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
+if [  "${COMPONENT}" = "Stepup-Webauthn" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ] || [  "${COMPONENT}" = "Stepup-RA" ] || [  "${COMPONENT}" = "Stepup-Middleware" ]; then
     PHP=php72
 fi
 
@@ -98,7 +101,7 @@ fi
 echo "Composer validate done"
 
 
-if [  "${COMPONENT}" = "Stepup-Azure-MFA" ] || [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
+if [  "${COMPONENT}" = "Stepup-Azure-MFA" ] || [ "${COMPONENT}" = "Stepup-Webauthn" ] || [  "${COMPONENT}" = "Stepup-RA" ] || [  "${COMPONENT}" = "Stepup-Middleware" ]; then
     echo "Use the .env.dist file"
     cp .env.dist .env
     echo "Copy the parameters and institutions dist files"
@@ -117,7 +120,7 @@ fi
 echo "Composer install done"
 
 # Webauthn uses Symfony 4 and php 7.2
-if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
+if [ "${COMPONENT}" = "Stepup-Webauthn" ] || [  "${COMPONENT}" = "Stepup-RA" ] || [  "${COMPONENT}" = "Stepup-Middleware" ]; then
     echo npm config set cache ${HOME}/npm_cache
     npm config set cache ${HOME}/npm_cache
     if [ $? -ne "0" ]; then
