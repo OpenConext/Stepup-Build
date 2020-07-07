@@ -77,7 +77,6 @@ COMMIT_DATE=`git log -1 --pretty="%cd" --date=iso`
 COMMIT_Z_DATE=`${PHP} -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));"`
 NAME=${COMPONENT}-${GIT_HEAD}${GIT_TAG_OR_BRANCH}-${COMMIT_Z_DATE}-${COMMIT_HASH}
 
-
 # Find a composer to use. Try "composer.phar" and "composer"
 COMPOSER_PATH=`which composer.phar`
 if [ -z "${COMPOSER_PATH}" ]; then
@@ -119,53 +118,20 @@ if [ $? -ne "0" ]; then
 fi
 echo "Composer install done"
 
-# Webauthn uses Symfony 4 and php 7.2
-if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
-    echo npm config set cache ${HOME}/npm_cache
-    npm config set cache ${HOME}/npm_cache
-    if [ $? -ne "0" ]; then
-        error_exit "setting npm cache location failed"
-    fi
-
-    echo yarn --cache-folder=${HOME}/yarn_cache install
-    yarn --cache-folder=${HOME}/yarn_cache install
-    if [ $? -ne "0" ]; then
-        error_exit "yarn install failed"
-    fi
-
-    echo yarn --cache-folder=${HOME}/yarn_cache encore prod
-    yarn  --cache-folder=${HOME}/yarn_cache encore prod
-    if [ $? -ne "0" ]; then
-        error_exit "install encore failed"
-    fi
-
-    echo ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
-    ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
-    if [ $? -ne "0" ]; then
-        error_exit "Composer archive failed"
-    fi
-    # Output dir is relative to CWD
-    echo bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
-    bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
-    if [ $? -ne "0" ]; then
-        rm ${CWD}/${NAME}.tar
-        error_exit "bzip2 failed"
-    fi
-    cd ${CWD}
-    echo "Created: ${NAME}.tar.bz2"
-    echo "End of stage2"
-    exit
-fi
-
-# new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
-if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
-    # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
-    echo install frontend dependencies
+# new build procedure, for all php7 and Symfony 3/4 components
+if [ "${COMPONENT}" = "Stepup-tiqr" ] || \
+   [ "${COMPONENT}" = "Stepup-Azure-MFA" ] || \
+   [ "${COMPONENT}" = "Stepup-RA" ] || \
+   [ "${COMPONENT}" = "Stepup-Middleware" ] || \
+   [ "${COMPONENT}" = "Stepup-Webauthn" ] ; then
+    echo Install frontend dependencies
+    echo ${PHP} ${COMPOSER_PATH} frontend-install
     ${PHP} ${COMPOSER_PATH} frontend-install
     if [ $? -ne "0" ]; then
         error_exit "frontend-install"
     fi
-    #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
+    echo Run composer archive
+    echo ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
     ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
     if [ $? -ne "0" ]; then
         error_exit "Composer archive failed"
@@ -184,12 +150,10 @@ fi
 
 # old build procedure for other components from here....
 # TODO: migrate to new build procedure
-
 TMP_ARCHIVE_DIR=`mktemp -d "/tmp/${COMPONENT}.XXXXXXXX"`
 if [ $? -ne "0" ]; then
     error_exit "Could not create temp dir"
 fi
-
 
 ${PHP} ${COMPOSER_PATH} archive --format=tar --dir="${TMP_ARCHIVE_DIR}" --no-interaction
 if [ $? -ne "0" ]; then
@@ -201,12 +165,10 @@ if [ ! -f ${ARCHIVE_TMP_NAME} ]; then
     error_exit "Archive not found"
 fi
 
-
 # Untar archive we just created so we can add to it
 # tar archives that are appended to (--append) cause trouble during untar on centos
 
 echo "Unpacking archive"
-
 cd ${TMP_ARCHIVE_DIR}
 if [ $? -ne "0" ]; then
     error_exit "Could not change to archive dir archive"
@@ -216,7 +178,6 @@ tar -xf "${ARCHIVE_TMP_NAME}"
 if [ $? -ne "0" ]; then
     error_exit "Untar failed"
 fi
-
 
 # Add bootstrap.php.cache (symfony2 apps only)
 if [ "$PHP" != "php72" ]; then
