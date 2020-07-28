@@ -167,6 +167,12 @@ NAME=`echo "${NAME}" | tr / _`
 cd ${BASEDIR}
 
 echo "Starting stage2 in the build VM"
+echo "Testing if VM is running"
+vagrant ssh -c "ls /vagrant/ >> /dev/null"
+if [ $? -ne "0" ]; then
+    echo "VM not running; trying to start"
+    vagrant up
+fi
 # "tmp/build.XXXXXXXX" is 18 characters long
 echo vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 vagrant ssh -c "cd /vagrant && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
