@@ -94,21 +94,44 @@
 - name: make composer executable
   file: path=/usr/local/bin/composer mode="a+x"
 
-# Install a nodejs that is newer than the Centos 7 distro version (6.17.1)
-- name: "Install nodejs 10.x repo"
-  shell:
-    cmd: "curl -sL https://rpm.nodesource.com/setup_10.x | bash -"
-    warn: false
-    creates: /etc/yum.repos.d/nodesource-el7.repo
 
-- name: "Install nodejs 10.x"
-  yum:
-    state: present
-    name:
-      - nodejs
+## Nodejs / NPM / Yarn stack ##
 
-- name: "Install npm module 'yarn'"
-  npm:
-    name: yarn
-    global: yes
-    state: present
+# Note that that the centos 7 nodejs (version 6), nmp and the nodjejs-less module are installed for
+# The Stepup components that still use Assetic (Currently (Release 17) these are: Stepup-Gateway, Stepup-Selfservice
+# and Stepup-RA) require nodejs and nodejs-less at install time (not at build time)
+
+# Newer components require a newer nodejs at build time only. We use nvm to install newer node versions and to switch to
+# a newer node version.
+# nvm is installed as root. Add "source /root/.bashrc" to the shell command to enable nvm, then use "nvm use <version>"
+# to enable one of the installed versions. ".bashrc" is not sourced by the ansible shell command, so you must add
+# "source /root/.bashrc && nvm use 12 && <the command>" to the shell command otherwise node will not be available.
+
+- name: Install nodejs and yarn using nvm for the vagrant user
+  block:
+
+  - name: "Install node version manager (nvm)"
+    shell:
+      cmd: "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash"
+      warn: false # disable curl warning
+      creates: /home/vagrant/.nvm/
+
+
+  - name: "Install node version 10"
+    shell:
+      cmd: "source /home/vagrant/.bashrc && nvm install 10"
+
+  - name: "Install npm module 'yarn' for node version 10"
+    shell:
+      cmd: "source /home/vagrant/.bashrc && nvm use 10 && npm install --global yarn"
+
+
+  - name: "Install node version 12"
+    shell:
+      cmd: "source /home/vagrant/.bashrc && nvm install 12"
+
+  - name: "Install npm module 'yarn' for node version 12"
+    shell:
+      cmd: "source /home/vagrant/.bashrc && nvm use 12 && npm install --global yarn"
+
+  become_user: vagrant
