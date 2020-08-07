@@ -55,6 +55,7 @@
     - php56-php-dom
     - php56-php-bcmath
     - php56-php-gmp
+    - php56-php-gd
 
     # php 7.2
     - php72-php-cli
@@ -66,6 +67,7 @@
     - php72-php-bcmath
     - php72-php-gmp
     - php72-php-pecl-libsodium
+    - php72-php-gd
 
     - curl
     - git
