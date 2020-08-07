@@ -19,6 +19,12 @@ COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA
 BUILD_ENV=build
 SYMFONY_ENV=prod
 
+bold=$(tput bold)
+normal=$(tput sgr0)
+white=$(tput setaf 7)
+gray=$(tput setaf 10)
+
+
 function error_exit {
     echo "${1}"
     if [ -n "${TMP_ARCHIVE_DIR}" -a -d "${TMP_ARCHIVE_DIR}" ]; then
@@ -26,6 +32,19 @@ function error_exit {
     fi
     cd ${CWD}
     exit 1
+}
+
+function command {
+    echo ""
+    cur_dir=`pwd`
+    # emulate terminal prompt to let command standout
+    echo "${gray}[`whoami`@`hostname` `dirname $cur_dir`]$ ${white}${bold}${1}${normal}"
+    ${1}
+    rv=$?
+    if [ $rv -ne 0 ]; then
+      echo "Command failed with code $rv"
+    fi
+    return $rv
 }
 
 # Process options
@@ -90,8 +109,7 @@ echo "Using symfony env: ${BUILD_ENV}"
 echo "Using ${PHP}"
 
 # Check that composer lock and composer match
-echo ${COMPOSER_PATH} validate
-${PHP} ${COMPOSER_PATH} validate
+command "${PHP} ${COMPOSER_PATH} validate"
 if [ $? -ne "0" ]; then
     error_exit "Composer validate failed"
 fi
@@ -109,8 +127,7 @@ fi
 
 export SYMFONY_ENV=${BUILD_ENV}
 
-echo ${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
-${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
+command "${PHP} ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader"
 if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
 fi
@@ -130,20 +147,18 @@ if [ "${COMPONENT}" = "Stepup-Webauthn" ]; then
         error_exit "yarn install failed"
     fi
 
-    echo yarn --cache-folder=${HOME}/yarn_cache encore prod
-    yarn  --cache-folder=${HOME}/yarn_cache encore prod
+    command "nvm use 10 && yarn --cache-folder=${HOME}/yarn_cache encore prod"
     if [ $? -ne "0" ]; then
-        error_exit "install encore failed"
+        error_exit "yarn encore failed"
     fi
 
-    echo ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
-    ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
+    command "${PHP} ${COMPOSER_PATH} archive --dir='${OUTPUT_DIR}' --file='${NAME}' --format=tar --no-interaction"
     if [ $? -ne "0" ]; then
         error_exit "Composer archive failed"
     fi
+
     # Output dir is relative to CWD
-    echo bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
-    bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
+    command "bzip2 -9 '${OUTPUT_DIR}/${NAME}.tar'"
     if [ $? -ne "0" ]; then
         rm ${CWD}/${NAME}.tar
         error_exit "bzip2 failed"
@@ -157,21 +172,21 @@ fi
 # new build procedure, introduced with Stepup-tiqr for symfony3 (skip tarball editing)
 if [  "${COMPONENT}" = "Stepup-tiqr" ] || [  "${COMPONENT}" = "Stepup-Azure-MFA" ]; then
     # Webpack encore is a nodejs tool to compile css into web/build/ directory (replaces mopa)
-    echo install frontend dependencies
-    ${PHP} ${COMPOSER_PATH} frontend-install
-    echo run composer encore production
-    echo ${PHP} ${COMPOSER_PATH} encore production
-    ${PHP} ${COMPOSER_PATH} encore production
+    echo "install frontend dependencies"
+    command "${PHP} ${COMPOSER_PATH} frontend-install"
+
+    echo "run composer encore production"
+    command "${PHP} ${COMPOSER_PATH} encore production"
     if [ $? -ne "0" ]; then
         error_exit "encore failed"
     fi
-    #${COMPOSER_PATH} archive --format=tar --file="${OUTPUT_DIR}/${NAME}.tar" --no-interaction
-    ${PHP} ${COMPOSER_PATH} archive --dir="${OUTPUT_DIR}" --file="${NAME}" --format=tar --no-interaction
+
+    command "${PHP} ${COMPOSER_PATH} archive --dir=${OUTPUT_DIR} --file=${NAME} --format=tar --no-interaction"
     if [ $? -ne "0" ]; then
         error_exit "Composer archive failed"
     fi
     # Output dir is relative to CWD
-    bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
+    command "bzip2 -9 ${OUTPUT_DIR}/${NAME}.tar"
     if [ $? -ne "0" ]; then
         rm ${CWD}/${NAME}.tar
         error_exit "bzip2 failed"
@@ -190,8 +205,7 @@ if [ $? -ne "0" ]; then
     error_exit "Could not create temp dir"
 fi
 
-
-${PHP} ${COMPOSER_PATH} archive --format=tar --dir="${TMP_ARCHIVE_DIR}" --no-interaction
+command "${PHP} ${COMPOSER_PATH} archive --format=tar --dir=${TMP_ARCHIVE_DIR} --no-interaction"
 if [ $? -ne "0" ]; then
     error_exit "Composer achive failed"
 fi
@@ -212,17 +226,17 @@ if [ $? -ne "0" ]; then
     error_exit "Could not change to archive dir archive"
 fi
 
-tar -xf "${ARCHIVE_TMP_NAME}"
+command "tar -xf ${ARCHIVE_TMP_NAME}"
 if [ $? -ne "0" ]; then
     error_exit "Untar failed"
 fi
 
 # Add bootstrap.php.cache (symfony2 apps only)
-echo Adding bootstrap.php.cache
-cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
+echo "Adding bootstrap.php.cache"
+command "cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app"
 if [ $? -ne "0" ]; then
     #Bootstrap file is in /var on symfony3
-    cp ${CWD}/${COMPONENT}/var/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/var
+    command "cp ${CWD}/${COMPONENT}/var/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/var"
     if [ $? -ne "0" ]; then
 	    error_exit "Could not copy app/bootstrap.php.cache or var/bootstrap.php.cache to archive"
     fi
@@ -230,8 +244,8 @@ fi
 
 # Add composer.phar
 # console mopa:bootstrap:symlink:less requires it
-echo Adding composer.phar
-cp ${COMPOSER_PATH} ${TMP_ARCHIVE_DIR}/composer.phar
+echo "Adding composer.phar"
+command "cp ${COMPOSER_PATH} ${TMP_ARCHIVE_DIR}/composer.phar"
 if [ $? -ne "0" ]; then
     error_exit "Could not copy composer.phar to archive"
 fi
@@ -245,12 +259,12 @@ fi
 echo "Creating final archive"
 
 # Output dir is relative to CWD
-tar -cf "${OUTPUT_DIR}/${NAME}.tar" .
+command "tar -cf ${OUTPUT_DIR}/${NAME}.tar ."
 if [ $? -ne "0" ]; then
     error_exit "Error creating archive"
 fi
 
-bzip2 -9 "${OUTPUT_DIR}/${NAME}.tar"
+command "bzip2 -9 ${OUTPUT_DIR}/${NAME}.tar"
 if [ $? -ne "0" ]; then
     rm ${CWD}/${NAME}.tar
     error_exit "bzip2 failed"
