@@ -19,7 +19,7 @@ CWD=`pwd`
 # List of supported components
 COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php"  "Stepup-Azure-MFA")
 BUILD_ENV=build
-SYMFONY_ENV=prod
+SYMFONY_ENV=prod # Default, set to BUILD_ENV for composer install
 
 # colors for prettyfying build command output
 bold=$(tput bold)
@@ -278,7 +278,7 @@ if [ "${ENCORE}" = "yes" ]; then
     if [ $? -ne 0 ]; then
         echo "Could not get yarn version. Is it installed?"
     fi
-    echo "Using yarn versioon: ${YARN_VERSION_STRING}"
+    echo "Using yarn version: ${YARN_VERSION_STRING}"
 
     # install yarn
     do_command "yarn --cache-folder=${HOME}/yarn_cache install"
