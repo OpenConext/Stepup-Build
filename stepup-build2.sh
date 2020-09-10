@@ -262,7 +262,14 @@ if [ "${SYMFONY_VERSION}" = "4" ]; then
 fi
 
 # Set Symfony build environment
-export SYMFONY_ENV=${BUILD_ENV}
+do_command "export SYMFONY_ENV=${BUILD_ENV}"
+
+# Symfony 4 components are using Flex (https://symfony.com/doc/current/setup/flex.html) which
+# requires APP_ENV=prod during composer install (https://symfony.com/doc/current/deployment.html#c-install-update-your-vendors)
+if [ ${SYMFONY_VERSION} = 4 ]; then
+    # Set APP_ENV=prod for symfony Flex
+    do_command "export APP_ENV=prod"
+fi
 
 # Composer install
 do_command "${PHP} ${COMPOSER} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader"
