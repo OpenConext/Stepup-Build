@@ -294,7 +294,7 @@ if [ "${ENCORE}" = "yes" ]; then
     fi
 
     # run yarn encore
-    do_command "yarn --cache-folder=${HOME}/yarn_cache encore prod"
+    do_command "yarn --cache-folder=${HOME}/yarn_cache encore production"
     if [ $? -ne "0" ]; then
         error_exit "yarn encore failed"
     fi
