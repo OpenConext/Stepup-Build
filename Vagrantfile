@@ -19,6 +19,12 @@ Vagrant.configure(2) do |config|
     end
     config.vm.provider "virtualbox" do |v|
       v.memory = 8192
+      # Prevent fylesystem issues in Virtualbox
+      config.vm.network :private_network, ip: "192.168.66.4"
+      config.vm.synced_folder ".", "/vagrant",
+        type: "nfs",
+        nfs_version: 4,
+        nfs_udp: false
     end
   end
 
