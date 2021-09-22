@@ -111,7 +111,7 @@ if [ "${http_response}" -ne "200" ]; then
     rm $TMP_FILE
     echo "Creating release with tag '${githubtag}' in '${githubrepo}'"
     json="{\"tag_name\": \"${githubtag}\", \"target_commitish\": \"${commit_sha1}\", \"name\": \"${githubtag}\", \"body\": \"\", \"draft\": false, \"prerelease\": true}"
-    http_response=`curl --write-out %{http_code} --silent --output "${TMP_FILE}" --data "${json}" https://api.github.com/repos/${githubrepo}/releases?access_token=${github_token}`
+    http_response=`curl -H "Authorization: token ${github_token}" --write-out %{http_code} --silent --output "${TMP_FILE}" --data "${json}" "https://api.github.com/repos/${githubrepo}/releases"`
     res=$?
     if [ "${res}" -ne 0 ]; then
         error_exit "Problem accessing github"
@@ -142,7 +142,7 @@ fi
 
 echo "Uploading ${component_tarball_basename}"
 rm $TMP_FILE
-http_response=`curl  --progress-bar --write-out %{http_code}  --output "${TMP_FILE}" -H "Content-Type: application/x-bzip2" --data-binary "@${COMPONENT_TARBALL}" "https://uploads.github.com/repos/${githubrepo}/releases/${release_id}/assets?name=${component_tarball_basename}&access_token=${github_token}"`
+http_response=`curl  -H "Authorization: token ${github_token}" --progress-bar --write-out %{http_code}  --output "${TMP_FILE}" -H "Content-Type: application/x-bzip2" --data-binary "@${COMPONENT_TARBALL}" "https://uploads.github.com/repos/${githubrepo}/releases/${release_id}/assets?name=${component_tarball_basename}"`
 res=$?
 if [ "${res}" -ne 0 ]; then
     error_exit "Problem accessing github"
