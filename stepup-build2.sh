@@ -103,7 +103,7 @@ fi
 PHP_VERSION=56
 INCLUDE_COMPOSER_BOOTSTRAP=no # Whether to include Symfony bootstrap cache and composer in the archive
 ENCORE=no # Whether to run yarn encore
-NODEJS_VERSION=10 # Nodejs version for building is 10, Symfony 3 gw, ss and ra use nodejs 6 during deploy
+NODEJS_VERSION=10 # Nodejs version for building is 14, This can be set in the component_info file
 SYMFONY_VERSION=3
 
 case ${COMPONENT} in
