@@ -103,7 +103,7 @@ fi
 PHP_VERSION=56
 INCLUDE_COMPOSER_BOOTSTRAP=no # Whether to include Symfony bootstrap cache and composer in the archive
 ENCORE=no # Whether to run yarn encore
-NODEJS_VERSION=10 # Nodejs version for building is 10, Symfony 3 gw, ss and ra use nodejs 6 during deploy
+NODE_VERSION=10 # Nodejs version for building is 14, This can be set in the component_info file
 SYMFONY_VERSION=3
 
 case ${COMPONENT} in
@@ -162,6 +162,7 @@ if [ -f "${COMPONENT_INFO_FILE}" ]; then
     valid_line_regex='^(([[:space:]]*)|(#.*)|([A-Z_]+=[a-z0-9]+[[:space:]]*))$'
     while IFS= read -r line
     do
+    	echo $line
         [[ $line =~ $valid_line_regex ]]
         if [ $? -ne 0 ]; then
             error_exit "Invalid line in component_info: $line"
@@ -195,17 +196,17 @@ NVM_VERSION_STRING=`nvm version`
 if [ $? -ne "0" ]; then
     error_exit "error getting nvm version. Is it installed?"
 fi
-echo "Setting nodejs version to ${NODEJS_VERSION}"
+echo "Setting nodejs version to ${NODE_VERSION}"
 # Use nvm to active the desired nodejs version
-do_command "nvm use ${NODEJS_VERSION}"
+do_command "nvm use ${NODE_VERSION}"
 if [ $? -ne 0 ]; then
    echo "Setting node version failed"
 fi
 
-NODEJS_VERSION_STRING=`node --version`
+NODE_VERSION_STRING=`node --version`
 
 echo "Using nvm version: ${NVM_VERSION_STRING}"
-echo "Using nodejs version ${NODEJS_VERSION} (${NODEJS_VERSION_STRING})"
+echo "Using nodejs version ${NODE_VERSION} (${NODE_VERSION_STRING})"
 
 
 # Get the php cli to use
