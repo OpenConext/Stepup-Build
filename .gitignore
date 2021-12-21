@@ -4,4 +4,14 @@
 /Stepup-SelfService/
 /Stepup-Middleware/
 /Stepup-Gateway/
+/Stepup-Azure-MFA/
+/Stepup-Webauthn/
+/Stepup-tiqr/
+/oath-service-php/
+/node_modules/
 /yum/
+/tmp/
+/Stepup-*.tar.bz2
+/oath-service-php-*.tar.bz2
+*VBoxSVC*.log
+/yarn.lock
