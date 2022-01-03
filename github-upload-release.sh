@@ -72,6 +72,11 @@ githubtag=${tag_branch}-${commit_time}-${commit_sha1}
 
 githubrepo="OpenConext/${COMPONENT}"
 
+# keyserver is not in the openconext org
+if [ ${COMPONENT} == "oath-service-php" ]; then
+	githubrepo="SURFnet/${COMPONENT}"
+fi
+
 echo "Path to tarball: ${COMPONENT_TARBALL}"
 echo "Component full: ${component_tarball_basename}"
 echo "Component: ${COMPONENT}"
