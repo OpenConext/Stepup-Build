@@ -4,6 +4,7 @@ version: "3.8"
 
 services:
   build-container:
+    user: root
     stdin_open: true
     image: "ghcr.io/openconext/openconext-containers/openconext-php-build-stepup:latest"
     volumes:
