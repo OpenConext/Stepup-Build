@@ -16,7 +16,7 @@
 
 CWD=`pwd`
 COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA")
-BUILD_ENV=build
+BUILD_ENV=prod
 
 function error_exit {
     echo "${1}"
@@ -133,11 +133,11 @@ if [ $? -ne "0" ]; then
 fi
 
 # Add bootstrap.php.cache
-echo Adding bootstrap.php.cache
-cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
-if [ $? -ne "0" ]; then
-    error_exit "Could not copy app/bootstrap.php.cache to archive"
-fi
+#echo Adding bootstrap.php.cache
+#cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
+#if [ $? -ne "0" ]; then
+#    error_exit "Could not copy app/bootstrap.php.cache to archive"
+#fi
 
 # Add composer.phar
 # console mopa:bootstrap:symlink:less requires it
