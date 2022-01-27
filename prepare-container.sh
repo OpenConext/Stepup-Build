@@ -17,7 +17,7 @@
 source ~/.bashrc
 
 echo "Read node version from the component_info file of the ${1} project under build"
-COMPONENT_INFO_NODE_VERSION=cat ./$1/component_info|grep NODE_VERSION=|cut -d "=" -f2
+COMPONENT_INFO_NODE_VERSION=$(cat ./$1/component_info|grep NODE_VERSION=|cut -d "=" -f2)
 
 echo "Setting the container to use node version: ${COMPONENT_INFO_NODE_VERSION}"
 nvm install $COMPONENT_INFO_NODE_VERSION
