@@ -12,6 +12,7 @@
 /yum/
 /tmp/
 /Stepup-*.tar.bz2
+/Stepup-*.sha
 /oath-service-php-*.tar.bz2
 *VBoxSVC*.log
 /yarn.lock
