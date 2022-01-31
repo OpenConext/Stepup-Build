@@ -15,7 +15,7 @@
 # limitations under the License.
 
 CWD=`pwd`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA", "Stepup-tiqr")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA", "Stepup-tiqr" "Stepup-Azure-MFA" "Stepup-Webauthn")
 BUILD_ENV=prod
 
 function error_exit {
