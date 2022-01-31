@@ -15,7 +15,7 @@
 # limitations under the License.
 
 CWD=`pwd`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA", "Stepup-tiqr")
 BUILD_ENV=prod
 
 function error_exit {
@@ -168,9 +168,21 @@ if [ $? -ne "0" ]; then
 fi
 
 rm -r ${TMP_ARCHIVE_DIR}
-
 cd ${CWD}
 
+echo "Create checksum file" &&
+if hash sha1sum 2>/dev/null; then
+    sha1sum ${OUTPUT_DIR}/${NAME}.tar.bz2 > ${NAME}.sha
+else
+    shasum ${OUTPUT_DIR}/${NAME}.tar.bz2 > ${NAME}.sha
+fi
+
+if [ $? -ne "0" ]; then
+    error_exit "shasum creation failed"
+fi
+
+
 echo "Created: ${NAME}.tar.bz2"
+echo "Created: ${NAME}.sha"
 
 echo "End of stage2"
