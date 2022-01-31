@@ -90,16 +90,6 @@ if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
 fi
 
-#php app/console assets:install --symlink
-#if [ $? -ne "0" ]; then
-#    error_exit "console command 'assets:install' failed"
-#fi
-
-#php app/console mopa:bootstrap:symlink:less
-#if [ $? -ne "0" ]; then
-#    error_exit "console command: 'mopa:bootstrap:symlink:less' failed"
-#fi
-
 TMP_ARCHIVE_DIR=`mktemp -d "/tmp/${COMPONENT}.XXXXXXXX"`
 if [ $? -ne "0" ]; then
     error_exit "Could not create temp dir"
@@ -117,7 +107,7 @@ if [ ! -f ${ARCHIVE_TMP_NAME} ]; then
 fi
 
 
-# Untar archicve we just created so we can add to it
+# Untar archive we just created so we can add to it
 # tar archives that are appended to (--append) cause trouble during untar on centos
 
 echo "Unpacking archive"
@@ -131,13 +121,6 @@ tar -xf "${ARCHIVE_TMP_NAME}"
 if [ $? -ne "0" ]; then
     error_exit "Untar failed"
 fi
-
-# Add bootstrap.php.cache
-#echo Adding bootstrap.php.cache
-#cp ${CWD}/${COMPONENT}/app/bootstrap.php.cache ${TMP_ARCHIVE_DIR}/app
-#if [ $? -ne "0" ]; then
-#    error_exit "Could not copy app/bootstrap.php.cache to archive"
-#fi
 
 # Add composer.phar
 # console mopa:bootstrap:symlink:less requires it
