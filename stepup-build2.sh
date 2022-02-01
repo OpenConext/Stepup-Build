@@ -15,7 +15,7 @@
 # limitations under the License.
 
 CWD=`pwd`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA", "Stepup-tiqr" "Stepup-Azure-MFA" "Stepup-Webauthn")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Azure-MFA" "Stepup-Webauthn")
 BUILD_ENV=prod
 
 function error_exit {
@@ -84,7 +84,8 @@ echo "Composer version: ${COMPOSER_VERSION}"
 echo "Using symfony env: ${BUILD_ENV}"
 
 export SYMFONY_ENV=${BUILD_ENV}
-#export SYMFONY_ENV=build
+export APP_ENV=${BUILD_ENV}
+
 ${COMPOSER_PATH} install --prefer-dist --ignore-platform-reqs --no-dev --no-interaction --optimize-autoloader
 if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
@@ -114,7 +115,7 @@ echo "Unpacking archive"
 
 cd ${TMP_ARCHIVE_DIR}
 if [ $? -ne "0" ]; then
-    error_exit "Could not cange to archive dir archive"
+    error_exit "Could not change to archive dir archive"
 fi
 
 tar -xf "${ARCHIVE_TMP_NAME}"
