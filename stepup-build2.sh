@@ -91,6 +91,25 @@ if [ $? -ne "0" ]; then
     error_exit "Composer install failed"
 fi
 
+# Get the NPM, Yarn and such into the environment
+export NVM_DIR="/usr/local/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+
+echo "Running yarn install with frozen lockfile"
+yarn install --frozen-lockfile
+if [ $? -ne "0" ]; then
+    error_exit "Yarn install with frozen lockfile failed"
+fi
+
+
+echo "Running Webpack encore"
+yarn encore production
+if [ $? -ne "0" ]; then
+    error_exit "Encore production failed"
+fi
+
+
 TMP_ARCHIVE_DIR=`mktemp -d "/tmp/${COMPONENT}.XXXXXXXX"`
 if [ $? -ne "0" ]; then
     error_exit "Could not create temp dir"
