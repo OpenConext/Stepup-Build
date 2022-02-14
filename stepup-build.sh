@@ -107,7 +107,7 @@ echo "Base dir for cloning / fetching repo: ${BASEDIR}"
 # Checkout / update component from git 
 if [ ! -d "$COMPONENT" ]; then
     cd ${BASEDIR}
-    git clone git@github.com:SURFnet/${COMPONENT}.git
+    git clone https://github.com/OpenConext/${COMPONENT}.git
 else
     cd ${BASEDIR}/${COMPONENT}
     git fetch --all --tags
