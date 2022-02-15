@@ -55,6 +55,7 @@ if [ "$found" -ne "1" ]; then
 fi
 
 GIT_BRANCH='';
+GIT_ORG='OpenConext'
 GIT_TAG='';
 
 while [[ $# > 0 ]]
@@ -101,13 +102,19 @@ echo "Component: ${COMPONENT}"
 
 cd ${BASEDIR}
 BASEDIR=`pwd`
+
+if [ ${COMPONENT} == "oath-service-php" ]; then
+	GIT_ORG='SURFnet'
+fi
+
 echo "Base dir for cloning / fetching repo: ${BASEDIR}"
+echo "Cloning / fetching from: ${GIT_ORG}/${COMPONENT}"
 
 
 # Checkout / update component from git
 if [ ! -d "$COMPONENT" ]; then
     cd ${BASEDIR}
-    git clone https://github.com/OpenConext/${COMPONENT}.git
+    git clone https://github.com/${GIT_ORG}/${COMPONENT}.git
 else
     cd ${BASEDIR}/${COMPONENT}
     git fetch --all --tags
