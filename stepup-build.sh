@@ -166,6 +166,12 @@ fi
 NAME=${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}
 NAME=`echo "${NAME}" | tr / _`
 
+if ! command -v docker-compose &> /dev/null
+then
+    echo "docker-compose could not be found"
+    exit 1
+fi
+
 echo "Starting stage2 in the build VM"
 # Start the container
 docker-compose -f ../docker-compose.yml up -d
