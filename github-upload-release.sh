@@ -15,7 +15,7 @@
 
 CWD=`pwd`
 BASEDIR=`dirname $0`
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php" "Stepup-irma" "Stepup-Azure-MFA" "Stepup-Webauthn" "Stepup-gssp-example")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php" "Stepup-irma" "Stepup-Azure-MFA" "Stepup-Webauthn" "Stepup-gssp-example" "Stepup-API")
 
 function error_exit {
     echo "${1}"
