@@ -1,0 +1,11 @@
+---
+version: "3.8"
+
+services:
+  build-container:
+    image: "ghcr.io/openconext/openconext-basecontainers/php82-apache2-node20-composer2"
+    working_dir: /var/build
+    user: root
+    stdin_open: true
+    volumes:
+      - .:/var/build
