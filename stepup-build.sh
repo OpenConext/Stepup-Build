@@ -182,7 +182,7 @@ if [ "$PHP_VERSION" = "72" ]; then
 	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "./prepare-container.sh ${COMPONENT}"
 	# "tmp/build.XXXXXXXX" is 18 characters long
 	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
-	if [ $# -ne "0" ]; then
+	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
 fi
@@ -193,7 +193,7 @@ if [ "$PHP_VERSION" = "82" ]; then
 	docker-compose -f ../docker-compose-php82.yml up -d
 	# "tmp/build.XXXXXXXX" is 18 characters long
 	docker-compose -f ../docker-compose-php82.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
-	if [ $# -ne "0" ]; then
+	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
 fi
