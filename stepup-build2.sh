@@ -29,6 +29,10 @@ if ! command -v tput &> /dev/null; then
   gray=""
   red=""
 else
+  # Set TERM to dumb if it is not set
+  if [ -z "${TERM}" ]; then
+    export TERM=dumb
+  fi
   bold=$(tput bold)
   normal=$(tput sgr0)
   white=$(tput setaf 7)
