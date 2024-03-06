@@ -144,14 +144,23 @@ else
 	exit 1
 fi
 
-# Get the NPM, Yarn and such into the environment
-export NVM_DIR="/usr/local/nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-NVM_VERSION_STRING=$(nvm --version)
-NODE_VERSION_STRING=$(node --version)
+# Check if NODE_VERSION is set in component_info
+if [ -z "${NODE_VERSION}" ]; then
+  echo "NODE_VERSION not set in component_info"
+else
+  NODE_VERSION_STRING=$(node --version)
+  if [ $? -ne 0 ]; then
+    error_exit "node not found"
+  fi
+  # A node version string looks like "v20.11.1". We want to extract the major version number (i.e. 20) and compare
+  # that to the required version specified in NODE_VERSION in the component_info file.
+  node_major_version=$(echo ${NODE_VERSION_STRING} | sed -E 's/v([0-9]+)\..*/\1/')
 
-echo "Using nvm version: ${NVM_VERSION_STRING}"
-echo "Using nodejs version ${NODE_VERSION} (${NODE_VERSION_STRING})"
+  if [ "$node_major_version" -ne $NODE_VERSION ]; then
+    error_exit "Node version ${NODE_VERSION_STRING} does not match the node version specified in component_info: ${NODE_VERSION}"
+  fi
+  echo "Using nodejs version: ${NODE_VERSION_STRING}"
+fi
 
 # Get the php cli to use
 PHP=$(which php)
