@@ -190,7 +190,8 @@ cd "${COMPONENT}"
 
 # Make name for archive based on git commit hash and date
 # Mark component dir as safe
-git config --global --add safe.directory "${COMPONENT}"
+echo "Marking ${CWD}/${COMPONENT} as safe for git"
+git config --global --add safe.directory "${CWD}/${COMPONENT}"
 
 COMMIT_HASH=$(git log -1 --pretty="%H")
 if [ $? -ne 0 ]; then
