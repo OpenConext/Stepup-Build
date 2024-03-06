@@ -166,8 +166,17 @@ COMPOSER_VERSION_STRING=$(${PHP} ${COMPOSER} --version)
 cd ${COMPONENT}
 
 # Make name for archive based on git commit hash and date
+# Mark component dir as safe
+git config --global --add safe.directory "${COMPONENT}"
+
 COMMIT_HASH=$(git log -1 --pretty="%H")
+if [ $? -ne 0 ]; then
+  error_exit "Cannot get git commit hash"
+fi
 COMMIT_DATE=$(git log -1 --pretty="%cd" --date=iso)
+if [ $? -ne 0 ]; then
+  error_exit "Cannot get git commit date"
+fi
 COMMIT_Z_DATE=$(${PHP} -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));")
 NAME=${COMPONENT}-${GIT_HEAD}${GIT_TAG_OR_BRANCH}-${COMMIT_Z_DATE}-${COMMIT_HASH}
 
