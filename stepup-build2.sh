@@ -41,10 +41,10 @@ fi
 #   error_exit <error message>
 function error_exit {
 	echo "${red}${1}${normal}${white}"
-	if [ -n "${TMP_ARCHIVE_DIR}" -a -d "${TMP_ARCHIVE_DIR}" ]; then
+	if [ -n "${TMP_ARCHIVE_DIR}" ] && [ -d "${TMP_ARCHIVE_DIR}" ]; then
 		rm -r "${TMP_ARCHIVE_DIR}"
 	fi
-	cd ${CWD}
+	cd "${CWD}"
 	exit 1
 }
 
@@ -67,14 +67,14 @@ function do_command {
 #################
 # Process options
 OUTPUT_DIR=$1
-if [ ! -d ${OUTPUT_DIR} ]; then
+if [ ! -d "${OUTPUT_DIR}" ]; then
 	error_exit "Output dir does not exist"
 fi
 shift
-cd ${OUTPUT_DIR}
+cd "${OUTPUT_DIR}" || error_exit "Cannot cd to output dir"
 OUTPUT_DIR=$(pwd)
 echo "Using output dir: ${OUTPUT_DIR}"
-cd ${CWD}
+cd "${CWD}" || error_exit "Cannot cd to working dir"
 
 COMPONENT=$1
 shift
@@ -138,13 +138,13 @@ if [ -f "${COMPONENT_INFO_FILE}" ]; then
 	# $                                   Match end of string
 	valid_line_regex='^(([[:space:]]*)|(#.*)|([A-Z_]+=[a-z0-9\/"[:space:]]+[[:space:]]*))$'
 	while IFS= read -r line; do
-		echo $line
+		echo "$line"
 		[[ $line =~ $valid_line_regex ]]
 		if [ $? -ne 0 ]; then
 			error_exit "Invalid line in component_info: $line"
 		fi
 	done <"${COMPONENT_INFO_FILE}"
-	source ${COMPONENT_INFO_FILE}
+	source "${COMPONENT_INFO_FILE}"
 	if [ $? -ne 0 ]; then
 		error_exit "sourcing component_info file failed"
 	fi
@@ -179,10 +179,10 @@ if [ -z "${PHP}" ]; then
 fi
 PHP_VERSION_STRING=$(${PHP} -r 'echo phpversion();')
 
-COMPOSER_VERSION_STRING=$(${PHP} ${COMPOSER} --version)
+COMPOSER_VERSION_STRING=$(${PHP} "${COMPOSER}" --version)
 
 # Set working directory to the root of the component
-cd ${COMPONENT}
+cd "${COMPONENT}"
 
 # Make name for archive based on git commit hash and date
 # Mark component dir as safe
@@ -262,19 +262,18 @@ echo "Creating final archive"
 # Zip the archive
 do_command "bzip2 -9 ${OUTPUT_DIR}/${NAME}.tar"
 if [ $? -ne "0" ]; then
-	rm ${CWD}/${NAME}.tar
+	rm "${CWD}/${NAME}.tar"
 	error_exit "bzip2 failed"
 fi
 
-cd ${CWD}
+cd "${CWD}" || error_exit "Cannot cd to working dir"
 
-echo "Create checksum file" &&
-	if hash sha1sum 2>/dev/null; then
-		sha1sum ${OUTPUT_DIR}/${NAME}.tar.bz2 >${NAME}.sha
-	else
-		shasum ${OUTPUT_DIR}/${NAME}.tar.bz2 >${NAME}.sha
-	fi
-
+echo "Create checksum file"
+if hash sha1sum 2>/dev/null; then
+  sha1sum "${OUTPUT_DIR}/${NAME}.tar.bz2" > "${NAME}.sha"
+else
+  shasum "${OUTPUT_DIR}/${NAME}.tar.bz2" > "${NAME}.sha"
+fi
 if [ $? -ne "0" ]; then
 	error_exit "shasum creation failed"
 fi
