@@ -196,7 +196,7 @@ if [ "$PHP_VERSION" = "82" ]; then
   fi
 	# "tmp/build.XXXXXXXX" is 18 characters long
 	echo "Starting stage2 build in the container"
-	docker-compose -f ../docker-compose-php82.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
+	docker-compose -f ../docker-compose-php82.yml exec -t build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
