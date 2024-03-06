@@ -24,10 +24,10 @@ whoami
 
 function error_exit {
 	echo "${1}"
-	if [ -n "${TMP_ARCHIVE_DIR}" -a -d "${TMP_ARCHIVE_DIR}" ]; then
+	if [ -n "${TMP_ARCHIVE_DIR}" ] && [ -d "${TMP_ARCHIVE_DIR}" ]; then
 		rm -r "${TMP_ARCHIVE_DIR}"
 	fi
-	cd ${CWD}
+	cd "${CWD}"
 	exit 1
 
 }
@@ -56,7 +56,7 @@ GIT_BRANCH=''
 GIT_ORG='OpenConext'
 GIT_TAG=''
 
-while [[ $# > 0 ]]; do
+while [[ $# -gt 0 ]]; do
 	option="$1"
 	shift
 
@@ -83,24 +83,24 @@ while [[ $# > 0 ]]; do
 		shift
 		;;
 	*)
-		error_exit "Unkown option: '${option}'"
+		error_exit "Unknown option: '${option}'"
 		;;
 	esac
 done
 
-if [ -n "${GIT_BRANCH}" -a -n "${GIT_TAG}" ]; then
+if [ -n "${GIT_BRANCH}" ] && [ -n "${GIT_TAG}" ]; then
 	error_exit "Don't know how to handle both --branch and --tag"
 fi
-if [ -z "${GIT_BRANCH}" -a -z "${GIT_TAG}" ]; then
+if [ -z "${GIT_BRANCH}" ] && [ -z "${GIT_TAG}" ]; then
 	GIT_BRANCH=${DEFAULT_BRANCH}
 fi
 
 echo "Component: ${COMPONENT}"
 
-cd ${BASEDIR}
+cd "${BASEDIR}" || error_exit "Could not change to base dir"
 BASEDIR=$(pwd)
 
-if [ ${COMPONENT} == "oath-service-php" ]; then
+if [ "${COMPONENT}" == "oath-service-php" ]; then
 	GIT_ORG='SURFnet'
 fi
 
@@ -109,17 +109,17 @@ echo "Cloning / fetching from: ${GIT_ORG}/${COMPONENT}"
 
 # Checkout / update component from git
 if [ ! -d "$COMPONENT" ]; then
-	cd ${BASEDIR}
-	git clone https://github.com/${GIT_ORG}/${COMPONENT}.git
+	cd "${BASEDIR}" || error_exit "Could not change to base dir"
+	git clone "https://github.com/${GIT_ORG}/${COMPONENT}.git"
 else
-	cd ${BASEDIR}/${COMPONENT}
+	cd "${BASEDIR}/${COMPONENT}" || error_exit "Could not change to component dir"
 	git fetch --all --tags
 fi
 if [ "$?" -ne "0" ]; then
 	error_exit "Error cloning / fetching repo"
 fi
 
-cd ${BASEDIR}/${COMPONENT}
+cd "${BASEDIR}/${COMPONENT}"
 if [ "$?" -ne "0" ]; then
 	error_exit "Error changing to component dir"
 fi
@@ -156,7 +156,7 @@ fi
 # Source the component_info file
 source component_info
 
-mkdir -p ${BASEDIR}/tmp
+mkdir -p "${BASEDIR}/tmp"
 if [ $? -ne "0" ]; then
 	error_exit "Could not create temp dir"
 fi
@@ -182,26 +182,30 @@ if [ "$PHP_VERSION" = "72" ]; then
 	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "./prepare-container.sh ${COMPONENT}"
 	# "tmp/build.XXXXXXXX" is 18 characters long
 	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
-	if [ $# -ne "0" ]; then
+	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
 fi
 
 if [ "$PHP_VERSION" = "82" ]; then
-	echo "Starting stage2 in the build container when using PHP82"
+	echo "Starting PHP 8.2 container for stage2"
 	# Start the container
 	docker-compose -f ../docker-compose-php82.yml up -d
+	if [ $? -ne "0" ]; then
+    error_exit "Could not start build container"
+  fi
 	# "tmp/build.XXXXXXXX" is 18 characters long
-	docker-compose -f ../docker-compose-php82.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
-	if [ $# -ne "0" ]; then
+	echo "Starting stage2 build in the container"
+	docker-compose -f ../docker-compose-php82.yml exec -t build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
+	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
 fi
 
-cp -i ${TMP_ARCHIVE_DIR}/*.tar.bz2 ${CWD}/
-if [ $# -ne "0" ]; then
+cp -i "${TMP_ARCHIVE_DIR}"/*.tar.bz2 "${CWD}/"
+if [ $? -ne "0" ]; then
 	error_exit "Aborted."
 fi
 
-rm -r ${TMP_ARCHIVE_DIR}
-cd ${CWD}
+rm -r "${TMP_ARCHIVE_DIR}"
+cd "${CWD}"
