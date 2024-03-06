@@ -202,7 +202,7 @@ if [ "$PHP_VERSION" = "82" ]; then
 	fi
 fi
 
-cp -i "${TMP_ARCHIVE_DIR}/*.tar.bz2" "${CWD}/"
+cp -i "${TMP_ARCHIVE_DIR}"/*.tar.bz2 "${CWD}/"
 if [ $? -ne "0" ]; then
 	error_exit "Aborted."
 fi
