@@ -20,11 +20,21 @@ COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA
 SYMFONY_ENV=prod
 
 # colors for prettyfying build command output
-bold=$(tput bold)
-normal=$(tput sgr0)
-white=$(tput setaf 7)
-gray=$(tput setaf 10)
-red=$(tput setaf 1)
+# check if tput is available
+if ! command -v tput &> /dev/null; then
+  echo "tput not found, not using colors"
+  bold=""
+  normal=""
+  white=""
+  gray=""
+  red=""
+else
+  bold=$(tput bold)
+  normal=$(tput sgr0)
+  white=$(tput setaf 7)
+  gray=$(tput setaf 10)
+  red=$(tput setaf 1)
+fi
 
 # Print error, return to CWD directory and exit
 # Usage:
