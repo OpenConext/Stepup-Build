@@ -16,7 +16,7 @@
 
 CWD=$(pwd)
 # List of supported components
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API" "OpenConext-profile")
 SYMFONY_ENV=prod
 
 # colors for prettyfying build command output

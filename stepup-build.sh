@@ -16,7 +16,7 @@
 
 CWD=$(pwd)
 BASEDIR=$(dirname $0)
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API" "OpenConext-profile")
 DEFAULT_BRANCH=develop
 BUILD_ENV=prod
 
@@ -192,8 +192,8 @@ if [ "$PHP_VERSION" = "82" ]; then
 	# Start the container
 	docker-compose -f ../docker-compose-php82.yml up -d
 	if [ $? -ne "0" ]; then
-    error_exit "Could not start build container"
-  fi
+		error_exit "Could not start build container"
+	fi
 	# "tmp/build.XXXXXXXX" is 18 characters long
 	echo "Starting stage2 build in the container"
 	docker-compose -f ../docker-compose-php82.yml exec -t build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
