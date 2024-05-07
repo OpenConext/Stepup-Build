@@ -16,7 +16,7 @@
 
 CWD=$(pwd)
 BASEDIR=$(dirname $0)
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API" "OpenConext-profile")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API" "OpenConext-profile" "OpenConext-user-lifecycle")
 DEFAULT_BRANCH=develop
 BUILD_ENV=prod
 

@@ -16,28 +16,28 @@
 
 CWD=$(pwd)
 # List of supported components
-COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API" "OpenConext-profile")
+COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "Stepup-Webauthn" "oath-service-php" "Stepup-Azure-MFA" "Stepup-gssp-example" "Stepup-API" "OpenConext-profile" "OpenConext-user-lifecycle")
 SYMFONY_ENV=prod
 
 # colors for prettyfying build command output
 # check if tput is available
-if ! command -v tput &> /dev/null; then
-  echo "tput not found, not using colors"
-  bold=""
-  normal=""
-  white=""
-  gray=""
-  red=""
+if ! command -v tput &>/dev/null; then
+	echo "tput not found, not using colors"
+	bold=""
+	normal=""
+	white=""
+	gray=""
+	red=""
 else
-  # Set TERM to dumb if it is not set
-  if [ -z "${TERM}" ]; then
-    export TERM=dumb
-  fi
-  bold=$(tput bold)
-  normal=$(tput sgr0)
-  white=$(tput setaf 7)
-  gray=$(tput setaf 10)
-  red=$(tput setaf 1)
+	# Set TERM to dumb if it is not set
+	if [ -z "${TERM}" ]; then
+		export TERM=dumb
+	fi
+	bold=$(tput bold)
+	normal=$(tput sgr0)
+	white=$(tput setaf 7)
+	gray=$(tput setaf 10)
+	red=$(tput setaf 1)
 fi
 
 # Print error, return to CWD directory and exit
@@ -160,20 +160,20 @@ fi
 
 # Check if NODE_VERSION is set in component_info
 if [ -z "${NODE_VERSION}" ]; then
-  echo "NODE_VERSION not set in component_info"
+	echo "NODE_VERSION not set in component_info"
 else
-  NODE_VERSION_STRING=$(node --version)
-  if [ $? -ne 0 ]; then
-    error_exit "node not found"
-  fi
-  # A node version string looks like "v20.11.1". We want to extract the major version number (i.e. 20) and compare
-  # that to the required version specified in NODE_VERSION in the component_info file.
-  node_major_version=$(echo ${NODE_VERSION_STRING} | sed -E 's/v([0-9]+)\..*/\1/')
+	NODE_VERSION_STRING=$(node --version)
+	if [ $? -ne 0 ]; then
+		error_exit "node not found"
+	fi
+	# A node version string looks like "v20.11.1". We want to extract the major version number (i.e. 20) and compare
+	# that to the required version specified in NODE_VERSION in the component_info file.
+	node_major_version=$(echo ${NODE_VERSION_STRING} | sed -E 's/v([0-9]+)\..*/\1/')
 
-  if [ "$node_major_version" -ne $NODE_VERSION ]; then
-    error_exit "Node version ${NODE_VERSION_STRING} does not match the node version specified in component_info: ${NODE_VERSION}"
-  fi
-  echo "Using nodejs version: ${NODE_VERSION_STRING}"
+	if [ "$node_major_version" -ne $NODE_VERSION ]; then
+		error_exit "Node version ${NODE_VERSION_STRING} does not match the node version specified in component_info: ${NODE_VERSION}"
+	fi
+	echo "Using nodejs version: ${NODE_VERSION_STRING}"
 fi
 
 # Get the php cli to use
@@ -195,11 +195,11 @@ git config --global --add safe.directory "${CWD}/${COMPONENT}"
 
 COMMIT_HASH=$(git log -1 --pretty="%H")
 if [ $? -ne 0 ]; then
-  error_exit "Cannot get git commit hash"
+	error_exit "Cannot get git commit hash"
 fi
 COMMIT_DATE=$(git log -1 --pretty="%cd" --date=iso)
 if [ $? -ne 0 ]; then
-  error_exit "Cannot get git commit date"
+	error_exit "Cannot get git commit date"
 fi
 COMMIT_Z_DATE=$(${PHP} -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));")
 NAME=${COMPONENT}-${GIT_HEAD}${GIT_TAG_OR_BRANCH}-${COMMIT_Z_DATE}-${COMMIT_HASH}
@@ -275,9 +275,9 @@ cd "${CWD}" || error_exit "Cannot cd to working dir"
 
 echo "Create checksum file"
 if hash sha1sum 2>/dev/null; then
-  sha1sum "${OUTPUT_DIR}/${NAME}.tar.bz2" > "${NAME}.sha"
+	sha1sum "${OUTPUT_DIR}/${NAME}.tar.bz2" >"${NAME}.sha"
 else
-  shasum "${OUTPUT_DIR}/${NAME}.tar.bz2" > "${NAME}.sha"
+	shasum "${OUTPUT_DIR}/${NAME}.tar.bz2" >"${NAME}.sha"
 fi
 if [ $? -ne "0" ]; then
 	error_exit "shasum creation failed"
