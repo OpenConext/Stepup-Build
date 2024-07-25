@@ -181,7 +181,7 @@ if [ "$PHP_VERSION" = "72" ]; then
 	# Set the component_info requirements in the container
 	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "./prepare-container.sh ${COMPONENT}"
 	# "tmp/build.XXXXXXXX" is 18 characters long
-	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
+	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "source ~/.bashrc && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
