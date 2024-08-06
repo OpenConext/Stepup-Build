@@ -169,19 +169,19 @@ fi
 NAME=${GIT_HEAD}${GIT_TAG}${GIT_BRANCH}
 NAME=$(echo "${NAME}" | tr / _)
 
-if ! command -v docker-compose &>/dev/null; then
-	echo "docker-compose could not be found"
+if ! command -v docker &>/dev/null; then
+	echo "docker command could not be found"
 	exit 1
 fi
 
 if [ "$PHP_VERSION" = "72" ]; then
 	echo "Starting stage2 in the build container when using PHP72"
 	# Start the container
-	docker-compose -f ../docker-compose.yml up -d
+	docker compose -f ../docker-compose.yml up -d
 	# Set the component_info requirements in the container
-	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "./prepare-container.sh ${COMPONENT}"
+	docker compose -f ../docker-compose.yml exec -T build-container bash -c "./prepare-container.sh ${COMPONENT}"
 	# "tmp/build.XXXXXXXX" is 18 characters long
-	docker-compose -f ../docker-compose.yml exec -T build-container bash -c "source ~/.bashrc && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
+	docker compose -f ../docker-compose.yml exec -T build-container bash -c "source ~/.bashrc && ./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
@@ -190,13 +190,13 @@ fi
 if [ "$PHP_VERSION" = "82" ]; then
 	echo "Starting PHP 8.2 container for stage2"
 	# Start the container
-	docker-compose -f ../docker-compose-php82.yml up -d
+	docker compose -f ../docker-compose-php82.yml up -d
 	if [ $? -ne "0" ]; then
 		error_exit "Could not start build container"
 	fi
 	# "tmp/build.XXXXXXXX" is 18 characters long
 	echo "Starting stage2 build in the container"
-	docker-compose -f ../docker-compose-php82.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
+	docker compose -f ../docker-compose-php82.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
 	if [ $? -ne "0" ]; then
 		error_exit "Stage2 failed"
 	fi
