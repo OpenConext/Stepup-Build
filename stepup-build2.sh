@@ -201,8 +201,10 @@ COMMIT_DATE=$(git log -1 --pretty="%cd" --date=iso)
 if [ $? -ne 0 ]; then
 	error_exit "Cannot get git commit date"
 fi
+
 COMMIT_Z_DATE=$(${PHP} -r "echo gmdate('YmdHis\Z', strtotime('${COMMIT_DATE}'));")
 NAME=${COMPONENT}-${GIT_HEAD}${GIT_TAG_OR_BRANCH}-${COMMIT_Z_DATE}-${COMMIT_HASH}
+NAME_PLAIN=${COMPONENT}-${GIT_HEAD}${GIT_TAG_OR_BRANCH}
 
 # Print composer install configuration
 echo "Using PHP: ${PHP} (${PHP_VERSION_STRING})"
@@ -284,7 +286,17 @@ if [ $? -ne "0" ]; then
 fi
 
 echo "Creating final archive"
+if [ "${RELEASE_TAR_GZ}" = "1" ]; then
+	echo "Creating tar.gz archive"
+	cp "${OUTPUT_DIR}/${NAME}.tar" "${OUTPUT_DIR}/${NAME_PLAIN}.tar"
+	do_command "gzip -9 ${OUTPUT_DIR}/${NAME_PLAIN}.tar"
+	if [ $? -ne "0" ]; then
+		rm "${CWD}/${NAME}.tar"
+		error_exit "gzip failed"
+	fi
+fi
 # Zip the archive
+echo "Creating tar.bz2 archive"
 do_command "bzip2 -9 ${OUTPUT_DIR}/${NAME}.tar"
 if [ $? -ne "0" ]; then
 	rm "${CWD}/${NAME}.tar"
@@ -295,16 +307,23 @@ cd "${CWD}" || error_exit "Cannot cd to working dir"
 
 echo "Create checksum file"
 if hash sha1sum 2>/dev/null; then
-	sha1sum "${OUTPUT_DIR}/${NAME}.tar.bz2" >"${NAME}.sha"
-else
-	shasum "${OUTPUT_DIR}/${NAME}.tar.bz2" >"${NAME}.sha"
+	alias shasum=sha1sum
+fi
+shasum "${OUTPUT_DIR}/${NAME}.tar.bz2" >"${NAME}.sha"
+if [ "${RELEASE_TAR_GZ}" = "1" ]; then
+	shasum "${OUTPUT_DIR}/${NAME_PLAIN}.tar.gz" >> "${NAME_PLAIN}.sha"
 fi
 if [ $? -ne "0" ]; then
 	error_exit "shasum creation failed"
 fi
 
-echo "Created: ${NAME}.tar.bz2"
+echo "Created:" "${NAME}.tar.bz2"
+if [ "${RELEASE_TAR_GZ}" = "1" ]; then
+	echo "Created:" "${NAME_PLAIN}.tar.gz"
+fi
 echo "Created: ${NAME}.sha"
+
+ls -la
 
 echo "End of stage2"
 

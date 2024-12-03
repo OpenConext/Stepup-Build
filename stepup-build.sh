@@ -202,10 +202,14 @@ if [ "$PHP_VERSION" = "82" ]; then
 	fi
 fi
 
-cp -i "${TMP_ARCHIVE_DIR}"/*.tar.bz2 "${CWD}/"
+echo "Copying artifacts to ${CWD}"
+ls -la "${TMP_ARCHIVE_DIR}"
+cp -vi "${TMP_ARCHIVE_DIR}"/*.tar.* "${CWD}/"
 if [ $? -ne "0" ]; then
 	error_exit "Aborted."
 fi
 
 rm -r "${TMP_ARCHIVE_DIR}"
 cd "${CWD}"
+
+ls -la
