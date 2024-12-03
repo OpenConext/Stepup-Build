@@ -18,37 +18,37 @@ BASEDIR=`dirname $0`
 COMPONENTS=("Stepup-Middleware" "Stepup-Gateway" "Stepup-SelfService" "Stepup-RA" "Stepup-tiqr" "oath-service-php" "Stepup-irma" "Stepup-Azure-MFA" "Stepup-Webauthn" "Stepup-gssp-example" "Stepup-API")
 
 function error_exit {
-    echo "${1}"
-    if [ -n "${TMP_FILE}" -a -d "${TMP_FILE}" ]; then
-        rm "${TMP_FILE}"
-    fi
-    cd ${CWD}
-    exit 1
+	echo "${1}"
+	if [ -n "${TMP_FILE}" -a -d "${TMP_FILE}" ]; then
+		rm "${TMP_FILE}"
+	fi
+	cd ${CWD}
+	exit 1
 }
 
 # Process options
 COMPONENT_TARBALL=$1
 if [ -z "${COMPONENT_TARBALL}"  ]; then
-    echo "Usage: $0 <component tarball>"
-    exit 1;
+	echo "Usage: $0 <component tarball>"
+	exit 1;
 fi
 
 if [ ! -f "${COMPONENT_TARBALL}" ]; then
-    error_exit "File not found: '${COMPONENT_TARBALL}'"
+	error_exit "File not found: '${COMPONENT_TARBALL}'"
 fi
 
 
 component_tarball_basename=`basename ${COMPONENT_TARBALL}`
 found=0
 for comp in "${COMPONENTS[@]}"; do
-    regex="^($comp).*(\.tar\.bz2)$"
-    if [[ $component_tarball_basename =~ $regex ]]; then
-        found=1
-        COMPONENT=$comp
-    fi
+	regex="^($comp).*(\.tar\.bz2)$"
+	if [[ $component_tarball_basename =~ $regex ]]; then
+		found=1
+		COMPONENT=$comp
+	fi
 done
 if [ "$found" -ne "1" ]; then
-    error_exit "Tarball to deploy must end in .tar.bz2 and start with one of: ${COMPONENTS[*]}"
+	error_exit "Tarball to deploy must end in .tar.bz2 and start with one of: ${COMPONENTS[*]}"
 fi
 
 # Get absolute path to component tarball
@@ -60,7 +60,7 @@ cd ${CWD}
 # Cut commit hash from tarball
 regex="^${COMPONENT}-(.*)-([0-9]{14}Z)-([0-9a-f]{40})\.tar\.bz2$"
 if [[ ! $component_tarball_basename =~ $regex ]]; then
-   error_exit "Tarball name must have format: ${COMPONENT}-tag_or_branch-commit_date-commit_sha1.tar.bz2"
+	error_exit "Tarball name must have format: ${COMPONENT}-tag_or_branch-commit_date-commit_sha1.tar.bz2"
 fi
 
 tag_branch=${BASH_REMATCH[1]}
@@ -89,7 +89,7 @@ echo
 
 
 if [ ! -f ~/.github-access-token ]; then
-    error_exit "You need an github access token to authenticate to github. Create one at 'https://github.com/settings/tokens' with scope 'repo' or 'public_repo'. Store the token in '~/.github-access-token'"
+	error_exit "You need an github access token to authenticate to github. Create one at 'https://github.com/settings/tokens' with scope 'repo' or 'public_repo'. Store the token in '~/.github-access-token'"
 fi
 github_token=`cat ~/.github-access-token`
 
@@ -97,7 +97,7 @@ github_token=`cat ~/.github-access-token`
 
 TMP_FILE=`mktemp -t github-uploadXXXX`
 if [ $? -ne "0" ]; then
-    error_exit "Could not create temp file"
+	error_exit "Could not create temp file"
 fi
 
 echo "Checking github for release with tag '${githubtag}' in '${githubrepo}'"
@@ -105,29 +105,29 @@ http_response=`curl --write-out %{http_code} --silent --output ${TMP_FILE} https
 res=$?
 
 if [ "${res}" -ne 0 ]; then
-    error_exit "Problem accessing github"
+	error_exit "Problem accessing github"
 fi
 
 if [ "${http_response}" -ne "404" -a "${http_response}" -ne "200" ]; then
-    error_exit "Unexpected HTTP response: ${http_response}"
+	error_exit "Unexpected HTTP response: ${http_response}"
 fi
 
 if [ "${http_response}" -ne "200" ]; then
-    rm $TMP_FILE
-    echo "Creating release with tag '${githubtag}' in '${githubrepo}'"
-    json="{\"tag_name\": \"${githubtag}\", \"target_commitish\": \"${commit_sha1}\", \"name\": \"${githubtag}\", \"body\": \"\", \"draft\": false, \"prerelease\": true}"
-    http_response=`curl -H "Authorization: token ${github_token}" --write-out %{http_code} --silent --output "${TMP_FILE}" --data "${json}" "https://api.github.com/repos/${githubrepo}/releases"`
-    res=$?
-    if [ "${res}" -ne 0 ]; then
-        error_exit "Problem accessing github"
-    fi
-    if [ "${http_response}" -ne "201" ]; then
-        cat ${TMP_FILE}; echo
-        error_exit "Unexpected HTTP response: ${http_response}"
-    fi
-    echo "Created release"
+	rm $TMP_FILE
+	echo "Creating release with tag '${githubtag}' in '${githubrepo}'"
+	json="{\"tag_name\": \"${githubtag}\", \"target_commitish\": \"${commit_sha1}\", \"name\": \"${githubtag}\", \"body\": \"\", \"draft\": false, \"prerelease\": true}"
+	http_response=`curl -H "Authorization: token ${github_token}" --write-out %{http_code} --silent --output "${TMP_FILE}" --data "${json}" "https://api.github.com/repos/${githubrepo}/releases"`
+	res=$?
+	if [ "${res}" -ne 0 ]; then
+		error_exit "Problem accessing github"
+	fi
+	if [ "${http_response}" -ne "201" ]; then
+		cat ${TMP_FILE}; echo
+		error_exit "Unexpected HTTP response: ${http_response}"
+	fi
+	echo "Created release"
 else
-    echo "Release already exists"
+	echo "Release already exists"
 fi
 
 # Parse release ID from received json using bash JSON parser from https://github.com/dominictarr/JSON.sh
@@ -140,9 +140,9 @@ echo "Github release id: ${release_id}"
 # Check whether file with given name was already uploaded
 asset_check=`cat $TMP_FILE | ${BASEDIR}/JSON.sh/JSON.sh | grep -c "^\[\"assets\",[0-9],\"name\"\].*${component_tarball_basename}"`
 if [ "${asset_check}" -gt "0" ]; then
-    echo "Asset with name '${component_tarball_basename}' already present. Nothing to do."
-    rm $TMP_FILE
-    exit 0;
+	echo "Asset with name '${component_tarball_basename}' already present. Nothing to do."
+	rm $TMP_FILE
+	exit 0
 fi
 
 echo "Uploading ${component_tarball_basename}"
@@ -150,26 +150,25 @@ rm $TMP_FILE
 http_response=`curl  -H "Authorization: token ${github_token}" --progress-bar --write-out %{http_code}  --output "${TMP_FILE}" -H "Content-Type: application/x-bzip2" --data-binary "@${COMPONENT_TARBALL}" "https://uploads.github.com/repos/${githubrepo}/releases/${release_id}/assets?name=${component_tarball_basename}"`
 res=$?
 if [ "${res}" -ne 0 ]; then
-    error_exit "Problem accessing github"
+	error_exit "Problem accessing github"
 fi
 if [ "${http_response}" -ne "201" ]; then
-    cat ${TMP_FILE}; echo
-    cat <<HELP
-    It is safe to try again...
-    If the upload fails with:
-    HTTP 422 {"message":"Validation Failed" ... ,"errors":[{"resource":"ReleaseAsset","code":"already_exists","field":"name"}]}
-    1) Go the release in github
-    2) Choose "Edit Release"
-    3) Delete the failing asset
-    4) Choose "Update release"
-    5) Try again
-HELP
-    error_exit "Unexpected HTTP response: ${http_response}"
+	cat ${TMP_FILE}; echo
+	cat <<-HELP
+	It is safe to try again...
+	If the upload fails with:
+	HTTP 422 {"message":"Validation Failed" ... ,"errors":[{"resource":"ReleaseAsset","code":"already_exists","field":"name"}]}
+	1) Go the release in github
+	2) Choose "Edit Release"
+	3) Delete the failing asset
+	4) Choose "Update release"
+	5) Try again
+	HELP
+	error_exit "Unexpected HTTP response: ${http_response}"
 fi
 echo "Uploaded tarball"
 echo -n "Download URL: "
 cat $TMP_FILE | ${BASEDIR}/JSON.sh/JSON.sh | grep '^\["browser_download_url"\]' | cut -f2
-
 
 rm $TMP_FILE
 

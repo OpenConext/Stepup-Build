@@ -258,25 +258,25 @@ if [ "${ENCORE}" = "yes" ]; then
 fi
 # Install engineblock frontend assets
 if [ "${COMPONENT}" = "OpenConext-engineblock" ]; then
-  YARN_VERSION_STRING=$(yarn --version)
-  cd theme || exit
-  if [ $? -ne 0 ]; then
-    echo "Could not get yarn version. Is it installed?"
-  fi
-  echo "Using yarn version: ${YARN_VERSION_STRING}"
+	YARN_VERSION_STRING=$(yarn --version)
+	cd theme || exit
+	if [ $? -ne 0 ]; then
+		echo "Could not get yarn version. Is it installed?"
+	fi
+	echo "Using yarn version: ${YARN_VERSION_STRING}"
 
-  # yarn install
-  do_command "yarn --cache-folder=${HOME}/yarn_cache install"
-  if [ $? -ne "0" ]; then
-    error_exit "yarn install failed"
-  fi
-  yarn release
-  do_command "yarn --cache-folder=${HOME}/yarn_cache release"
-  if [ $? -ne "0" ]; then
-    error_exit "yarn release failed"
-  fi
-  cd .. || exit
- fi
+	# yarn install
+	do_command "yarn --cache-folder=${HOME}/yarn_cache install"
+	if [ $? -ne "0" ]; then
+		error_exit "yarn install failed"
+	fi
+	yarn release
+	do_command "yarn --cache-folder=${HOME}/yarn_cache release"
+	if [ $? -ne "0" ]; then
+		error_exit "yarn release failed"
+	fi
+	cd .. || exit
+fi
 # Create final archive directly
 do_command "${PHP} ${COMPOSER} archive --dir=${OUTPUT_DIR} --file=${NAME} --format=tar --no-interaction"
 if [ $? -ne "0" ]; then
