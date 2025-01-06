@@ -183,6 +183,14 @@ if [ -z "${PHP}" ]; then
 fi
 PHP_VERSION_STRING=$(${PHP} -r 'echo phpversion();')
 
+# Update or downgrade composer to the version required in the component_info file
+if [ ${COMPOSER_VERSION} = 2 ]; then
+   ${COMPOSER} self-update --2
+fi
+if [ ${COMPOSER_VERSION} = 1 ]; then
+   ${COMPOSER} self-update --1
+fi
+
 COMPOSER_VERSION_STRING=$(${PHP} "${COMPOSER}" --version)
 
 # Set working directory to the root of the component
