@@ -279,7 +279,9 @@ if [ "${COMPONENT}" = "OpenConext-engineblock" ]; then
 	fi
 	cd .. || exit
 fi
+
 # Create final archive directly
+export ASSET_TAG=${COMMIT_HASH} # used by Engineblock composer archive action
 do_command "${PHP} ${COMPOSER} archive --dir=${OUTPUT_DIR} --file=${NAME} --format=tar --no-interaction"
 if [ $? -ne "0" ]; then
 	error_exit "Composer archive failed"
