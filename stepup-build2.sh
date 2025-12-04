@@ -223,10 +223,10 @@ echo "Composer validate done"
 # Set Symfony build environment
 do_command "export SYMFONY_ENV=${SYMFONY_ENV}"
 
-# Symfony 4 components are using Flex (https://symfony.com/doc/current/setup/flex.html) which
+# As of Symfony 4, components are using Flex (https://symfony.com/doc/current/setup/flex.html) which
 # requires APP_ENV=prod during composer install (https://symfony.com/doc/current/deployment.html#c-install-update-your-vendors)
-if [ ${SYMFONY_VERSION} = 4 ]; then
-	# Set APP_ENV=prod for symfony Flex
+if [ ${SYMFONY_VERSION} -ge 4 ]; then
+  # Set APP_ENV=prod for symfony Flex
 	do_command "export APP_ENV=${SYMFONY_ENV}"
 fi
 
