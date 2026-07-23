@@ -202,6 +202,21 @@ if [ "$PHP_VERSION" = "82" ]; then
 	fi
 fi
 
+if [ "$PHP_VERSION" = "85" ]; then
+	echo "Starting PHP 8.5 container for stage2"
+	# Start the container
+	docker compose -f ../docker-compose-php85.yml up -d
+	if [ $? -ne "0" ]; then
+		error_exit "Could not start build container"
+	fi
+	# "tmp/build.XXXXXXXX" is 18 characters long
+	echo "Starting stage2 build in the container"
+	docker compose -f ../docker-compose-php85.yml exec -T build-container bash -c "./stepup-build2.sh ${TMP_ARCHIVE_DIR:(-18)} ${COMPONENT} ${NAME}"
+	if [ $? -ne "0" ]; then
+		error_exit "Stage2 failed"
+	fi
+fi
+
 echo "Copying artifacts to ${CWD}"
 ls -la "${TMP_ARCHIVE_DIR}"
 cp -vi "${TMP_ARCHIVE_DIR}"/*.tar.* "${CWD}/"
